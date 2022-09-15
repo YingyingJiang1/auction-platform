@@ -9,6 +9,7 @@ private:
 	string phone;
 	string address;
 public:
+	User(){}
     User(string n, string p): BaseUser(n, p)
     {
         balance = 0.0;

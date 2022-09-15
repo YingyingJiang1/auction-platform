@@ -4,4 +4,8 @@
 #include"User.h"
 #include"Administrator.h"
 #include"type.h"
+#include"Prompt.h"
+void MainInterface(RuntimeFile*);
+void EnterAdmInterface();
+void EnterUserInterface();
 #endif

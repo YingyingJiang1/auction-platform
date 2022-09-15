@@ -26,13 +26,18 @@ private:
     UserEntry** usrsFile;
     CommodityEntry** commoditiesFile;
     OrderEntry** ordersFile;
+	int usrIndex;
+	int commIndex;
+	int orderIndex;
     void ReadToUsrs();
 	void ReadToComms();
 	void ReadToOrders();
 public:
     RuntimeFile();
     ~RuntimeFile();
-    LogFlag find(string name, string passwd) const;
+	void AddUser(string name, string passwd);
+    LogFlag matching(string name, string ) const;
+	bool find(string name) const;
 	void ShowUsrs()const;
 	void ShowCommodities()const;
 	void ShowOrders()const;

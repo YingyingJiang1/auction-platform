@@ -2,7 +2,12 @@
 
 RuntimeFile::RuntimeFile()
 {
-
+    usrIndex = 0;
+    commIndex = 0;
+    orderIndex =  0;
+    ReadToUsrs();
+    ReadToComms();
+    ReadToOrders();
 }
 
 RuntimeFile::~RuntimeFile()
@@ -10,7 +15,17 @@ RuntimeFile::~RuntimeFile()
 
 }
 
-LogFlag RuntimeFile::find(string name, string passwd) const
+void RuntimeFile::AddUser(string name, string passwd)
+{
+    
+}
+
+bool RuntimeFile::find(string name) const
+{
+
+}
+
+LogFlag RuntimeFile::matching(string name, string passwd) const
 {
 
 }

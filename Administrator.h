@@ -5,6 +5,7 @@
 class Administrator: public BaseUser
 {
 public:
+	Administrator(){}
 	Administrator(string n, string p):BaseUser(n, p){}
 	void ShowUsrs()const;
 	virtual void ShowCommodities() const;	
