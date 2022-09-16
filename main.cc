@@ -4,7 +4,7 @@ int main()
 {
     int seq;
     RuntimeFile file;
-    MainInterface(&file);
+    mainIntf(&file);
     return 0;
 }
 

@@ -1,21 +1,23 @@
 cc = g++
-objs = main.cc Administrator.o User.o RuntimeFile.o Prompt.o Interface.o
+objs = main.cc administrator.o user.o runtimeFile.o prompt.o interface.o baseUser.o
 #VPATH = input:compiler:execute
 
 main: $(objs)
 	$(cc) -g -o  main $(objs);
 	make clean
 
-Administrator.o: Administrator.h
-	$(cc) -c -g Administrator.cc
-User.o: User.h
-	$(cc) -c -g User.cc
-RuntimeFile.o: RuntimeFile.h 
-	$(cc) -c -g RuntimeFile.cc
-Prompt.o: 
-	$(cc) -c -g Prompt.cc
-Interface.o: Administrator.h User.h Prompt.h
-	$(cc) -c -g Interface.cc
+administrator.o: administrator.h
+	$(cc) -c -g administrator.cc
+user.o: user.h
+	$(cc) -c -g user.cc
+runtimeFile.o: runtimeFile.h 
+	$(cc) -c -g runtimeFile.cc
+prompt.o: 
+	$(cc) -c -g prompt.cc
+interface.o: administrator.h user.h prompt.h
+	$(cc) -c -g interface.cc
+baseUser.o: baseUser.h
+	$(cc) -c -g baseUser.cc
 
 .PHONY:clean
 clean:

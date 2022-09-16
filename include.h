@@ -1,11 +1,11 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
-#include"RuntimeFile.h"
-#include"User.h"
-#include"Administrator.h"
+#include"runtimeFile.h"
+#include"user.h"
+#include"administrator.h"
 #include"type.h"
-#include"Prompt.h"
-void MainInterface(RuntimeFile*);
-void EnterAdmInterface();
-void EnterUserInterface();
+#include"prompt.h"
+void mainIntf(RuntimeFile*);
+void enterAdmIntf();
+void enterUserIntf();
 #endif
