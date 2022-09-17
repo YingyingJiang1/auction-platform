@@ -1,5 +1,7 @@
 #include"runtimeFile.h"
 #include<fstream>
+#define ID_SIZE 4
+string starStr = "***************************************************************************************************************";
 
 RuntimeFile::RuntimeFile(int defaultSize )
 {
@@ -38,8 +40,8 @@ void RuntimeFile::addUser(const string name, string passwd)
         overflowProcess();
     assignment(name, usrsFile[usrsSize].name);
     assignment(passwd, usrsFile[usrsSize].passwd);
-    usrsFile[usrsSize].address[0] = 0;
-    usrsFile[usrsSize].phone[0] = 0;
+    assignment("modify your address", usrsFile[usrsSize].address);
+    assignment("phoneNumber",usrsFile[usrsSize].phone);
     usrsFile[usrsSize].balance = 0.0;
     usrsFile[usrsSize].state = ACTIVE;
     ++usrsSize;
@@ -100,10 +102,58 @@ bool RuntimeFile::modifyUsr()
 {
 
 }
+bool checkID(string usrID)
+{
+    if(usrID.length() != 4 || usrID[0] != 'U')
+        return false;
+    for(int i = 1; i < ID_SIZE; ++i)
+        if(!isdigit(usrID[i]))
+            return false;
+    return true;
+}
+void RuntimeFile::modifyUsrState()
+{
+    string usrID;
+    cout << "请输入要封禁的用户的ID：" ;
+    getline(cin,usrID);
+   if(checkID(usrID))
+   {
+        for(int i = 0; i < usrsSize; ++i)
+        {
+            if(equal(usrID, usrsFile[i].id))
+            {
+                cout << "是否确认封禁该用户?" << endl;
+                cout << starStr << endl;
+                printf("%-6s    %-10s   %-20s   %-40s   %-10s\n",
+                            "UserID","UserName","PhoneNumber","Address","Balance");
+                printf("%-6s    %-10s   %-20s   %-40s   %-10lf\n",
+                            usrsFile[i].id, usrsFile[i].name, usrsFile[i].phone, usrsFile[i].address,usrsFile[i].balance);
+                cout << starStr << endl;
+                cout << "请输入(y/n): ";
+                char ch;
+                cin >> ch;
+                if(tolower(ch) == 'y')
+                {
+                    usrsFile[i].state = INACTIVE;
+                    writeUsrsFile("w");
+                    cout << "封禁成功！" << endl << endl;
+                }
+                else
+                    cout << "封禁失败！" << endl << endl;
+                return;
+            }
+        }
+        cout << "用户ID不存在，封禁失败！" << endl <<endl;
+   }
+    else
+        cout << "非法ID，封禁失败！" << endl << endl;
+}
+
+
 
 void RuntimeFile::overflowProcess()
 {
-
+    
 }
 
 void RuntimeFile::readToComms()
@@ -123,12 +173,16 @@ void RuntimeFile::readToUsrs()
     FILE* input = fopen("usrs.txt", "r");
     int ret = 0;
     if(input)
-    {        
+    {    
         while(1)
         {
-            ret = fscanf(input, "%s,%s,%s,%s,%s,%lf,%d\n",usrsFile[usrsSize].id, usrsFile[usrsSize].name, 
-                                usrsFile[usrsSize].passwd,  usrsFile[usrsSize].phone, usrsFile[usrsSize].address,
-                                &usrsFile[usrsSize].balance, &usrsFile[usrsSize].state);
+            ret = fscanf(input, "%[^,]%*c%[^,]%*c%[^,]%*c%[^,]%*c%[^,]%*c%lf%*c%d\n",
+                                usrsFile[usrsSize].id, usrsFile[usrsSize].name,usrsFile[usrsSize].passwd,
+                                usrsFile[usrsSize].phone, usrsFile[usrsSize].address,&usrsFile[usrsSize].balance,
+                                &usrsFile[usrsSize].state);
+            //cout << usrsFile[0].id << ' ' << usrsFile[0].name << ' ' << usrsFile[0].passwd << " " << usrsFile[0].balance<<endl;
+            //cout << usrsFile[0].state<<endl;
+            //cout << ret <<endl;
             if(ret != 7)
                 break;
             ++usrsSize;
@@ -149,7 +203,20 @@ void RuntimeFile::showOrders() const
 
 void RuntimeFile::showUsrs() const
 {
-
+    cout << starStr << endl;
+    printf("%-6s    %-10s   %-20s   %-40s   %-10s   %-10s\n",
+                "UserID","UserName","PhoneNumber","Address","Balance","UserState");
+    for(int i = 0; i < usrsSize; ++i)
+    {
+        printf("%-6s    %-10s   %-20s   %-40s   %-10lf   ",
+                    usrsFile[i].id, usrsFile[i].name, usrsFile[i].phone, usrsFile[i].address,
+                    usrsFile[i].balance);
+        if(usrsFile[i].state)
+            printf("%-10s\n","ACTIVE");
+        else
+            printf("%-10s\n","INACTIVE");
+    }
+    cout << starStr << endl;
 }
 
 void RuntimeFile::writeCommsFile(const char* mode) const

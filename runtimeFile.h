@@ -70,13 +70,14 @@ public:
 	RuntimeFile(const RuntimeFile&);
 	void addUser(const string name, const string passwd);
     LogFlag matching(const string name, const string ) const;
-	bool find(const string name) const;
+	bool find(const string str) const;
 	void showUsrs()const;
 	void showCommodities()const;
 	void showOrders()const;
 	bool modifyUsr();
 	bool modifyComm();
 	bool modifyOrder();
+	void modifyUsrState();
 	void writeUsrsFile(const char*)const;
 	void writeCommsFile(const char*)const;
 	void writeOrdersFile(const char*)const;

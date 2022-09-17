@@ -3,7 +3,7 @@
 #include"runtimeFile.h"
 #include<iostream>
 using namespace std;
-
+extern RuntimeFile file;
 class BaseUser
 {
 protected:

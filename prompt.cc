@@ -2,7 +2,7 @@
 #include<iostream>
 using namespace std;
 static string str = "======================================================================="
-"=============";
+"==============";
  
 void prompt()
 {

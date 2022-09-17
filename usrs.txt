@@ -1,2 +1,2 @@
-U001,user1,user111,,,0.000000,1
-U002,user2,user222,,,0.000000,1
+U001,user1,user111,phoneNumber,modify your address,0.000000,1
+U002,user2,user222,phoneNumber,modify your address,0.000000,1

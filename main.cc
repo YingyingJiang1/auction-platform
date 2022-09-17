@@ -1,9 +1,9 @@
-#include "include.h"
-
+#include"runtimeFile.h"
+RuntimeFile file;
+void mainIntf(RuntimeFile*);
 int main()
 {
     int seq;
-    RuntimeFile file;
     mainIntf(&file);
     return 0;
 }
