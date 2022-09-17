@@ -43,7 +43,6 @@ void RuntimeFile::addUser(const string name, string passwd)
     usrsFile[usrsSize].balance = 0.0;
     usrsFile[usrsSize].state = ACTIVE;
     ++usrsSize;
-    std::cout << "get here" << endl;
     /*从0开始存放数据，用户id号从1开始*/
     assignID(usrsFile[usrsSize-1].id);
    
@@ -153,21 +152,32 @@ void RuntimeFile::showUsrs() const
 
 }
 
-void RuntimeFile::writeCommsFile() const
+void RuntimeFile::writeCommsFile(const char* mode) const
 {
 
 }
 
-void RuntimeFile::writeOrdersFile() const
+void RuntimeFile::writeOrdersFile(const char* mode) const
 {
 
 }
 
-void RuntimeFile::writeUsrsFile() const
+void RuntimeFile::writeUsrsFile(const char* mode) const
 {
-    FILE* output = fopen("usrs.txt","a");
-    for(int i = 0; i < i; ++i)    
+    FILE* output = fopen("usrs.txt",mode);
+    /*append to file*/
+    if(mode[0] == 'a')
+    {
+        fprintf(output, "%s,%s,%s,%s,%s,%lf,%d\n",usrsFile[usrsSize-1].id, usrsFile[usrsSize-1].name,
+                    usrsFile[usrsSize-1].passwd, usrsFile[usrsSize-1].phone, usrsFile[usrsSize-1].address,
+                    usrsFile[usrsSize-1].balance, usrsFile[usrsSize-1].state);
+    }
+    /*clean contents of file before writing*/
+    else
+    {
+        for(int i = 0; i < usrsSize; ++i)    
         fprintf(output, "%s,%s,%s,%s,%s,%lf,%d\n",usrsFile[i].id, usrsFile[i].name, usrsFile[i].passwd, 
-                                 usrsFile[i].phone, usrsFile[i].address, usrsFile[i].balance, usrsFile[i].state);
+                    usrsFile[i].phone, usrsFile[i].address, usrsFile[i].balance, usrsFile[i].state);
+    }
     fclose(output);
 }

@@ -77,9 +77,9 @@ public:
 	bool modifyUsr();
 	bool modifyComm();
 	bool modifyOrder();
-	void writeUsrsFile()const;
-	void writeCommsFile()const;
-	void writeOrdersFile()const;
+	void writeUsrsFile(const char*)const;
+	void writeCommsFile(const char*)const;
+	void writeOrdersFile(const char*)const;
 };
 
 

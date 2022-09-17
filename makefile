@@ -4,7 +4,6 @@ objs = main.cc administrator.o user.o runtimeFile.o prompt.o interface.o baseUse
 
 main: $(objs)
 	$(cc) -g -o  main $(objs);
-	make clean
 
 administrator.o: administrator.h
 	$(cc) -c -g administrator.cc

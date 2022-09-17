@@ -2,13 +2,15 @@
 #include "user.h"
 #include "prompt.h"
 #define HUGE_NUM 0X7FFFFFFF
+#define MAX_NAME_SIZE 10
+#define MAX_PASSEWD_SIZE 20
 Administrator *admLogin(RuntimeFile *);
 User *usrLogin(RuntimeFile *);
 void signIn(RuntimeFile *);
 void enterAdmIntf(Administrator *);
 void enterUserIntf(User *);
 void logout(Administrator *, User *);
-
+bool check(string, int);
 /*操作编号：1a 输入合法，代解决！*/
 /*记得要限定输入的字符个数！*/
 
@@ -266,16 +268,28 @@ void logout(Administrator *adm, User *user)
         delete user;
 }
 
+bool check(string str, int size)
+{
+    if(str.length() > size)
+        return false;
+    for(int i = 0; i < str.length(); ++i)
+    {
+        if(!isalnum(str[i]))
+            return false;
+    }
+    return true;
+}
+
 Administrator *admLogin(RuntimeFile *file)
 {
     string name, passwd;
     cout << "请输入用户名： ";
-    cin >> name;
+    getline(cin, name);
     cout << "请输入密码： ";
-    cin >> passwd;
+    getline(cin, passwd);
     if (name == "admin" && passwd == "123456")
     {
-        cout << "登陆成功！" << endl
+        cout << "登录成功！" << endl
              << endl;
         Administrator *adm = new Administrator(name, passwd);
         return adm;
@@ -292,16 +306,21 @@ User *usrLogin(RuntimeFile *file)
 {
     string name, passwd;
     cout << "请输入用户名： ";
-    cin >> name;
+    getline(cin, name);
     cout << "请输入密码： ";
-    cin >> passwd;
+    getline(cin, passwd);
+    if(!check(name,MAX_NAME_SIZE) ||!check(passwd, MAX_PASSEWD_SIZE) )
+    {
+        cout << "用户名或密码不合法，登录失败！" <<endl <<endl;
+        return nullptr;
+    }
     LogFlag flag = file->matching(name, passwd);
     switch (flag)
     {
     case LOGIN_SUCCEED:
     {
         User *usr = new User(name, passwd);
-        cout << "登陆成功！" << endl
+        cout << "登录成功！" << endl
              << endl;
         return usr;
     }
@@ -328,16 +347,25 @@ void signIn(RuntimeFile *file)
         提示注册成功；
     */
     string name, passwd;
+    string str = "**********************************************************************";
+    cout << endl;
+    cout << str <<endl;
+    cout << "请注意:" << endl;
+    cout << "用户名和密码都只能包含数字和英文字母" << endl;
+    cout << "用户名不能超过10个字符，密码不能超过20个字符" << endl;
+    cout << str <<endl;
     cout << "请输入用户名：";
-    cin >> name;
+    getline(cin, name);
     cout << "请输入密码：";
-    cin >> passwd;
-    if (file->find(name))
+    getline(cin, passwd);
+    if(!check(name,MAX_NAME_SIZE) ||!check(passwd, MAX_PASSEWD_SIZE) )
+        cout << "用户名或密码不合法，注册失败！" <<endl <<endl;
+    else if (file->find(name))
         cout << "该用户名已存在，注册失败！" << endl  << endl;
     else
     {
         file->addUser(name, passwd);
-        file->writeUsrsFile();
+        file->writeUsrsFile("a");
         cout << "注册成功！" << endl << endl;
     }
 }
