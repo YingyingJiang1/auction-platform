@@ -98,9 +98,26 @@ bool RuntimeFile::modifyOrder()
 
 }
 
-bool RuntimeFile::modifyUsr()
+void RuntimeFile::modifyUsrInfo(int flag, string usrName, string newInfo)
 {
+    int i = 0;
+     for(; i < usrsSize; ++i)
+    {
+        if(equal(usrName,usrsFile[i].name))
+            break;
+    }
+    /*修改用户名*/
+    if(1 == flag)
+        assignment(newInfo,usrsFile[i].name);                
+    /*修改联系方式*/
+    else if(2 == flag)
+        assignment(newInfo,usrsFile[i].phone);       
+    /*修改地址*/
+    else if(3 == flag)
+        assignment(newInfo,usrsFile[i].address);       
 
+    writeUsrsFile("w");
+    std::cout << "修改成功！" << endl << endl;
 }
 bool checkID(string usrID)
 {
@@ -114,7 +131,7 @@ bool checkID(string usrID)
 void RuntimeFile::modifyUsrState()
 {
     string usrID;
-    cout << "请输入要封禁的用户的ID：" ;
+    std::cout << "请输入要封禁的用户的ID：" ;
     getline(cin,usrID);
    if(checkID(usrID))
    {
@@ -122,31 +139,31 @@ void RuntimeFile::modifyUsrState()
         {
             if(equal(usrID, usrsFile[i].id))
             {
-                cout << "是否确认封禁该用户?" << endl;
-                cout << starStr << endl;
+                std::cout << "是否确认封禁该用户?" << endl;
+                std::cout << starStr << endl;
                 printf("%-6s    %-10s   %-20s   %-40s   %-10s\n",
                             "UserID","UserName","PhoneNumber","Address","Balance");
                 printf("%-6s    %-10s   %-20s   %-40s   %-10lf\n",
                             usrsFile[i].id, usrsFile[i].name, usrsFile[i].phone, usrsFile[i].address,usrsFile[i].balance);
-                cout << starStr << endl;
-                cout << "请输入(y/n): ";
+                std::cout << starStr << endl;
+                std::cout << "请输入(y/n): ";
                 char ch;
                 cin >> ch;
                 if(tolower(ch) == 'y')
                 {
                     usrsFile[i].state = INACTIVE;
                     writeUsrsFile("w");
-                    cout << "封禁成功！" << endl << endl;
+                    std::cout << "封禁成功！" << endl << endl;
                 }
                 else
-                    cout << "封禁失败！" << endl << endl;
+                    std::cout << "封禁失败！" << endl << endl;
                 return;
             }
         }
-        cout << "用户ID不存在，封禁失败！" << endl <<endl;
+        std::cout << "用户ID不存在，封禁失败！" << endl <<endl;
    }
     else
-        cout << "非法ID，封禁失败！" << endl << endl;
+        std::cout << "非法ID，封禁失败！" << endl << endl;
 }
 
 
@@ -180,9 +197,9 @@ void RuntimeFile::readToUsrs()
                                 usrsFile[usrsSize].id, usrsFile[usrsSize].name,usrsFile[usrsSize].passwd,
                                 usrsFile[usrsSize].phone, usrsFile[usrsSize].address,&usrsFile[usrsSize].balance,
                                 &usrsFile[usrsSize].state);
-            //cout << usrsFile[0].id << ' ' << usrsFile[0].name << ' ' << usrsFile[0].passwd << " " << usrsFile[0].balance<<endl;
-            //cout << usrsFile[0].state<<endl;
-            //cout << ret <<endl;
+            //std::cout << usrsFile[0].id << ' ' << usrsFile[0].name << ' ' << usrsFile[0].passwd << " " << usrsFile[0].balance<<endl;
+            //std::cout << usrsFile[0].state<<endl;
+            //std::cout << ret <<endl;
             if(ret != 7)
                 break;
             ++usrsSize;
@@ -203,7 +220,7 @@ void RuntimeFile::showOrders() const
 
 void RuntimeFile::showUsrs() const
 {
-    cout << starStr << endl;
+    std::cout << starStr << endl;
     printf("%-6s    %-10s   %-20s   %-40s   %-10s   %-10s\n",
                 "UserID","UserName","PhoneNumber","Address","Balance","UserState");
     for(int i = 0; i < usrsSize; ++i)
@@ -216,7 +233,7 @@ void RuntimeFile::showUsrs() const
         else
             printf("%-10s\n","INACTIVE");
     }
-    cout << starStr << endl;
+    std::cout << starStr << endl;
 }
 
 void RuntimeFile::writeCommsFile(const char* mode) const

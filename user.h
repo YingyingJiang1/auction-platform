@@ -1,7 +1,10 @@
 #ifndef USER_H
 #define USER_H
 #include"baseUser.h"
-
+#define MAX_NAME_SIZE 10
+#define MAX_PASSEWD_SIZE 20
+#define MAX_PHONENUMBER_SIZE 20
+#define MAX_ADDRESS_SIZE 40
 class User: public BaseUser
 {
 private:

@@ -1,8 +1,7 @@
 
 #include"administrator.h"
 #include"user.h"
-#define MAX_NAME_SIZE 10
-#define MAX_PASSEWD_SIZE 20
+extern string starStr;
 void logout(Administrator *adm, User *user)
 {
     if (adm)
@@ -10,8 +9,8 @@ void logout(Administrator *adm, User *user)
     if (user)
         delete user;
 }
-
-bool check(string str, int size)
+/*判断字符串是否只包含数字和英文字母，且符合长度*/
+bool checkAlnum(string str, int size)
 {
     if(str.length() > size)
         return false;
@@ -52,7 +51,7 @@ User *usrLogin()
     getline(cin, name);
     cout << "请输入密码： ";
     getline(cin, passwd);
-    if(!check(name,MAX_NAME_SIZE) ||!check(passwd, MAX_PASSEWD_SIZE) )
+    if(!checkAlnum(name,MAX_NAME_SIZE) ||!checkAlnum(passwd, MAX_PASSEWD_SIZE) )
     {
         cout << "用户名或密码不合法，登录失败！" <<endl <<endl;
         return nullptr;
@@ -90,18 +89,17 @@ void signIn()
         提示注册成功；
     */
     string name, passwd;
-    string str = "**********************************************************************";
     cout << endl;
-    cout << str <<endl;
+    cout << starStr <<endl;
     cout << "请注意:" << endl;
     cout << "用户名和密码都只能包含数字和英文字母" << endl;
     cout << "用户名不能超过10个字符，密码不能超过20个字符" << endl;
-    cout << str <<endl;
+    cout << starStr <<endl;
     cout << "请输入用户名：";
     getline(cin, name);
     cout << "请输入密码：";
     getline(cin, passwd);
-    if(!check(name,MAX_NAME_SIZE) ||!check(passwd, MAX_PASSEWD_SIZE) )
+    if(!checkAlnum(name,MAX_NAME_SIZE) ||!checkAlnum(passwd, MAX_PASSEWD_SIZE) )
         cout << "用户名或密码不合法，注册失败！" <<endl <<endl;
     else if (file.find(name))
         cout << "该用户名已存在，注册失败！" << endl  << endl;
