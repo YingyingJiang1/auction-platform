@@ -15,7 +15,11 @@ public:
 	User(){}
     User(string n, string p): BaseUser(n, p)
     {
-        balance = 0.0;
+        UsrInfo usrInfo;
+		file.getUsrInfo(name, &usrInfo);
+		balance = usrInfo.balance;
+		phone = usrInfo.phone;
+		address = usrInfo.address;
     }
 	void auction();
 	void buy();

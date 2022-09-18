@@ -3,7 +3,6 @@
 using namespace std;
 static string str = "======================================================================="
 "==============";
- 
 void prompt()
 {
     cout << str << endl;
@@ -26,7 +25,7 @@ void promptUser()
     cout << str << endl;
     cout << "       1.我是买家     2. 我是卖家     3.个人信息管理      4.注销登陆" << endl;
     cout << str << endl;
-
+    cout << "请输入要进行的操作的编号：" ;
 }
 
 void promptSeller()

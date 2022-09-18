@@ -62,7 +62,7 @@ void RuntimeFile::assignID(char* id)
         id[i] = '0';
 }
 
-bool RuntimeFile::equal(string str1, const char* str2) const
+bool RuntimeFile::equal(const string str1, const char* str2) const
 {
     int i = 0;
     for(; str1[i] != 0 && str2[i] != 0; ++i)
@@ -83,9 +83,35 @@ bool RuntimeFile::find(const string name) const
     return false;
 }
 
+void RuntimeFile::getUsrInfo(const string name, UsrInfo* usrInfo) const
+{
+    for(int i = 0; i < usrsSize; ++i)
+    {
+        if(equal(name,usrsFile[i].name))
+        {
+            usrInfo->balance = usrsFile[i].balance;
+            usrInfo->phone = usrsFile[i].phone;
+            usrInfo->address = usrsFile[i].address;
+            break;
+        }
+    }
+}
+
 LogFlag RuntimeFile::matching(const string name, string passwd) const
 {
-
+    int i = 0;
+    for(; i < usrsSize; ++i)
+    {
+        if(equal(name, usrsFile[i].name))
+        {
+            if(equal(passwd, usrsFile[i].passwd))
+                return LOGIN_SUCCEED;
+            else
+                return WRONG_PASSWD;
+        }
+    }
+    if(i == usrsSize)
+        return NO_USER;
 }
 
 bool RuntimeFile::modifyComm()
@@ -96,6 +122,19 @@ bool RuntimeFile::modifyComm()
 bool RuntimeFile::modifyOrder()
 {
 
+}
+
+void RuntimeFile::modifyUsrBal(string name, double newBalance)
+{
+    for(int i = 0; i < usrsSize; ++i)
+    {
+        if(equal(name, usrsFile[i].name))
+        {
+            usrsFile[i].balance = newBalance;
+            writeUsrsFile("w");
+            break;
+        }
+    }
 }
 
 void RuntimeFile::modifyUsrInfo(int flag, string usrName, string newInfo)
@@ -117,7 +156,6 @@ void RuntimeFile::modifyUsrInfo(int flag, string usrName, string newInfo)
         assignment(newInfo,usrsFile[i].address);       
 
     writeUsrsFile("w");
-    std::cout << "修改成功！" << endl << endl;
 }
 bool checkID(string usrID)
 {

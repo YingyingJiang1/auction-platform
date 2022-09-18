@@ -12,7 +12,7 @@ void logout(Administrator *adm, User *user)
 /*判断字符串是否只包含数字和英文字母，且符合长度*/
 bool checkAlnum(string str, int size)
 {
-    if(str.length() > size)
+    if(str.length() > size || str.length() == 0)
         return false;
     for(int i = 0; i < str.length(); ++i)
     {
@@ -62,16 +62,14 @@ User *usrLogin()
     case LOGIN_SUCCEED:
     {
         User *usr = new User(name, passwd);
-        cout << "登录成功！" << endl
-             << endl;
+        cout << "登录成功！" << endl << endl;
         return usr;
     }
     case NO_USER:
         cout << "用户不存在，请先注册！" << endl
              << endl;
     case WRONG_PASSWD:
-        cout << "密码错误，登录失败，返回主菜单！" << endl
-             << endl;
+        cout << "密码错误，登录失败，返回主菜单！" << endl << endl;
     default:;
     }
     return nullptr;

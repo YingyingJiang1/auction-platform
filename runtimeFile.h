@@ -5,6 +5,13 @@ using namespace std;
 #include"type.h"
 #include<iostream>
 
+typedef struct UsrInfo
+{
+	double balance;
+	string phone;
+	string address;
+}UsrInfo;
+
 typedef struct UserEntry
 {
     double balance;
@@ -52,7 +59,7 @@ private:
 	int size;
     void readToUsrs();
 	void readToComms();
-	void readToOrders();
+	void readToOrders();	
 	bool equal(const string, const char* )const ;
 	void overflowProcess();
 	/*将src赋值给dest*/
@@ -71,10 +78,12 @@ public:
 	void addUser(const string name, const string passwd);
     LogFlag matching(const string name, const string ) const;
 	bool find(const string ) const;
+	void getUsrInfo(const string, UsrInfo*) const;
 	void showUsrs()const;
 	void showCommodities()const;
 	void showOrders()const;
 	void modifyUsrInfo(int, string,string);
+	void modifyUsrBal(string, double);
 	bool modifyComm();
 	bool modifyOrder();
 	void modifyUsrState();

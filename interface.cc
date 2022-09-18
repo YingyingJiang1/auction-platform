@@ -1,11 +1,14 @@
 #include "interface.h"
-/*操作编号：1a 输入合法，代解决！*/
-/*记得要限定输入的字符个数！*/
+
 void enterAdmIntf(Administrator *);
 void enterUserIntf(User *);
+extern string starStr;
 
 void mainIntf(RuntimeFile *file)
 {
+    cout << starStr << endl;
+    cout << "请注意不要在您输入的操作编号中添加任何无关字符，包括空格！" << endl;
+    cout << starStr << endl;
     int seq;
     Administrator *adm;
     User *user;
@@ -13,7 +16,9 @@ void mainIntf(RuntimeFile *file)
     {
         prompt();
         cin >> seq;
-        if (cin.fail())
+        char ch = getc(stdin);
+        ungetc(ch, stdin);
+        if (cin.fail() || ch != '\n')
         {
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
@@ -53,7 +58,9 @@ void enterAdmIntf(Administrator *adm)
     {
         promptAdm();
         cin >> seq;
-        if (cin.fail())
+        char ch = getc(stdin);
+        ungetc(ch, stdin);
+        if (cin.fail() || ch != '\n')
         {
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
@@ -98,7 +105,9 @@ void enterBuyerIntf(User *user)
     {
         promptBuyer();
         cin >> seq;
-        if (cin.fail())
+        char ch = getc(stdin);
+        ungetc(ch, stdin);
+        if (cin.fail() || ch != '\n')
         {
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
@@ -140,7 +149,9 @@ void enterSellerIntf(User *user)
     {
         promptSeller();
         cin >> seq;
-        if (cin.fail())
+        char ch = getc(stdin);
+        ungetc(ch, stdin);
+        if (cin.fail() || ch != '\n')
         {
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
@@ -182,7 +193,9 @@ void enterInfoManageIntf(User *user)
     {
         promptPersonalInfo();
         cin >> seq;
-        if (cin.fail())
+        char ch = getc(stdin);
+        ungetc(ch, stdin);
+        if (cin.fail() || ch != '\n')
         {
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
@@ -219,7 +232,9 @@ void enterUserIntf(User *user)
     {
         promptUser();
         cin >> seq;
-        if (cin.fail())
+        char ch = getc(stdin);
+        ungetc(ch, stdin);
+        if (cin.fail() || ch != '\n')
         {
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
