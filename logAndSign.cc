@@ -44,7 +44,7 @@ Administrator *admLogin()
     }
 }
 
-User *usrLogin()
+User *userLogin()
 {
     string name, passwd;
     cout << "请输入用户名： ";
@@ -61,9 +61,9 @@ User *usrLogin()
     {
     case LOGIN_SUCCEED:
     {
-        User *usr = new User(name, passwd);
+        User *user = new User(name);
         cout << "登录成功！" << endl << endl;
-        return usr;
+        return user;
     }
     case NO_USER:
         cout << "用户不存在，请先注册！" << endl
@@ -104,7 +104,7 @@ void signIn()
     else
     {
         file.addUser(name, passwd);
-        file.writeUsrsFile("a");
+        file.writeUsersFile("a");
         cout << "注册成功！" << endl << endl;
     }
 }

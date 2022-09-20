@@ -3,52 +3,49 @@
 #include<string>
 using namespace std;
 #include"type.h"
+#include"fileEntry.h"
+#include"strCompare.h"
 #include<iostream>
 
 
 
 class RuntimeFile
 {
+	friend class Administrator;
+	friend class User;
 private:
-    UserEntry* usrsFile;
+    UserEntry* usersFile;
     CommodityEntry* commoditiesFile;
     OrderEntry* ordersFile;
-	int usrsSize;
+	int usersSize;
 	int commSize;
 	int orderSize;
 	/*动态数组的大小*/
 	int size;
-    void readToUsrs();
+    void readToUsers();
 	void readToComms();
 	void readToOrders();	
-	bool equal(const string, const char* )const ;
 	void overflowProcess();
-	/*将src赋值给dest*/
-	void assignment(const string src, char* dest){
-		int i = 0;
-		for(; src[i] != 0; ++i)
-			dest[i] = src[i];
-		dest[i] = 0;
-	}
-	void assignID(char*);
+	void assignCurDate(char*);
+	void assignID(char, char*, int);
 public:
     RuntimeFile(int defaultSize = 100);
-    ~RuntimeFile();
+    ~RuntimeFile();		
 	RuntimeFile operator = (RuntimeFile rFile);
 	RuntimeFile(const RuntimeFile&);
+	CommodityEntry* addCommodity( string &, double, int, string &, char*);
 	void addUser(const string name, const string passwd);
     LogFlag matching(const string name, const string ) const;
 	bool find(const string ) const;
-	void getUsrInfo(const string, UsrInfo*) const;
-	void showUsrs()const;
+	void showUsers()const;
 	void showCommodities()const;
 	void showOrders()const;
-	void modifyUsrInfo(int, string,string);
-	void modifyUsrBal(string, double);
+	void modifyUserInfo(int, string,string);
+	void modifyUserBal(string, double);
 	bool modifyComm();
 	bool modifyOrder();
-	void modifyUsrState();
-	void writeUsrsFile(const char*)const;
+	void modifyUserState();
+	void writeUsersFile(const char*)const;
 	void writeCommsFile(const char*)const;
 	void writeOrdersFile(const char*)const;
 };

@@ -4,9 +4,8 @@
 #include "user.h"
 #include "prompt.h"
 #include"type.h"
-#define HUGE_NUM 0X7FFFFFFF
 Administrator *admLogin();
-User *usrLogin();
+User *userLogin();
 void signIn();
 void logout(Administrator *, User *);
 #endif

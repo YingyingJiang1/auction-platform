@@ -1,5 +1,5 @@
 cc = g++
-objs = main.cc administrator.o user.o runtimeFile.o prompt.o interface.o baseUser.o logAndSign.o
+objs = main.cc administrator.o user.o runtimeFile.o prompt.o interface.o  logAndSign.o strCompare.o
 #VPATH = input:compiler:execute
 
 main: $(objs)
@@ -15,11 +15,10 @@ prompt.o:
 	$(cc) -c -g prompt.cc
 interface.o: interface.h
 	$(cc) -c -g interface.cc
-baseUser.o: baseUser.h
-	$(cc) -c -g baseUser.cc
 logAndSign.o: administrator.h user.h
 	$(cc) -c -g logAndSign.cc
-
+strCompare.o:
+	$(cc) -c -g strCompare.cc
 .PHONY:clean
 clean:
 	-rm *.o 

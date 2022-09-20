@@ -1,10 +1,24 @@
 #include"administrator.h"
-extern string starStr;
-void Administrator::viewUsrs() const
+void Administrator::viewUsers() const
 {
-    file.showUsrs();
+    file.showUsers();
 }
 	
+void Administrator::banUser() const
+{
+    file.modifyUserState();
+}
+
+void Administrator::pullCommodity() const
+{
+
+}
+
+void Administrator::searchCommodities() const
+{
+
+}
+
 void Administrator::viewCommodities() const
 {
     file.showCommodities();
@@ -15,7 +29,3 @@ void Administrator::viewOrders() const
     file.showOrders();
 }
 
-void Administrator::banUsr() const
-{
-    file.modifyUsrState();
-}

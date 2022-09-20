@@ -1,16 +1,20 @@
 #ifndef ADMINISTRATOR_H
 #define ADMINISTRATOR_H
-#include"baseUser.h"
+#include"runtimeFile.h"
 
-class Administrator: public BaseUser
+extern RuntimeFile file;
+extern string starStr;
+class Administrator
 {
 public:
 	Administrator(){}
-	Administrator(string n, string p):BaseUser(n, p){}
-	void viewUsrs()const;
+	Administrator(string n, string p){}
+	void banUser()const;
+	void pullCommodity() const;
+	void searchCommodities() const;
+	void viewUsers()const;
 	virtual void viewCommodities() const;	
 	virtual void viewOrders() const;
-	void banUsr()const;
 };
 #endif
 

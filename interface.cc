@@ -38,7 +38,7 @@ void mainIntf(RuntimeFile *file)
             signIn();
             break;
         case USER_LOG_IN:
-            user = usrLogin();
+            user = userLogin();
             if (user)
                 enterUserIntf(user);
             break;
@@ -84,10 +84,10 @@ void enterAdmIntf(Administrator *adm)
             adm->viewOrders();
             break;
         case ADM_VIEW_ALL_USERS:
-            adm->viewUsrs();
+            adm->viewUsers();
             break;
         case ADM_BAN_USER:
-            adm->banUsr();
+            adm->banUser();
             break;
         case ADM_LOG_OUT:
             return;
@@ -125,7 +125,7 @@ void enterBuyerIntf(User *user)
             user->buy();
             break;
         case BUYER_SEARCH_COMM:
-            user->searchCommodities();
+            user->searchCommodity();
             break;
         case BUYER_VIEW_ORDERS:
             user->viewBuyerOrders();
@@ -208,10 +208,10 @@ void enterInfoManageIntf(User *user)
         switch (seq)
         {
         case VIEW_INFO:
-            user->viewUsrInfo();
+            user->viewUserInfo();
             break;
         case MODIFY_INFO:
-            user->modifyUsrInfo();
+            user->modifyUserInfo();
             break;
         case TOP_UP:
             user->topUp();
