@@ -1,5 +1,7 @@
 #ifndef TYPE_H
 #define TYPE_H
+#include<string>
+using namespace std;
 enum LogFlag{NO_USER= 1, WRONG_PASSWD,LOGIN_SUCCEED};
 /*主菜单操作编号*/
 #define ADM_LOG_IN  1
@@ -46,4 +48,46 @@ enum LogFlag{NO_USER= 1, WRONG_PASSWD,LOGIN_SUCCEED};
 
 #define ACTIVE 1
 #define INACTIVE 0
+
+typedef struct UsrInfo
+{
+	double balance;
+	string phone;
+	string address;
+}UsrInfo;
+
+typedef struct UserEntry
+{
+    double balance;
+    int state;
+    char id[5];  
+    char passwd[21];
+    char phone[21]; 
+    char name[11]; 
+    char address[41]; 
+}UserEntry;
+
+typedef struct CommodityEntry
+{
+	char description[201];  
+    int number;
+    int state;
+    char id[5];
+    char sellerID[5];
+    char addedDate[11];
+    char name[21];  
+    double price;  
+}CommodityEntry;
+
+typedef struct OrderEntry
+{
+   char id[5];
+    char commodityID[5];
+    char sellerID[5];
+    char buyerID[5];
+    int number;
+    double unitPrice;    
+    char date[11]; 
+}OrderEntry;
+
 #endif

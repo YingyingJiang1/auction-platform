@@ -1,7 +1,22 @@
 #include"user.h"
 #define HUGE_NUM 0X7FFFFFFF
-extern string starStr;
-bool checkAlnum(string,int);
+#define MAX_COMM_NAME_SIZE 20
+#define MAX_COMM_DESCRIPTION_SIZE 200
+extern std::string starStr;
+bool checkAlnum(std::string,int);
+User::User(string n, string p, int size  =200): BaseUser(n, p)
+{
+    commSize = 0;
+    UserEntry usrInfo;
+    releasedComm = new CommodityEntry[size];
+    
+    file.getUsrInfo(name, &usrInfo);
+    balance = usrInfo.balance;
+    phone = usrInfo.phone;
+    address = usrInfo.address;
+    id = address
+    commSize = file.getComm(name, releaseCommodity);
+}
 void User::auction()
 {
 
@@ -173,5 +188,63 @@ void User::modifyUsrInfo()
 
 void User::releaseCommodity() const
 {
+    string commName, description;
+    double price;
+    int amount;
+    cout << "请输入商品名称：";
+    getline(cin, commName);
+    if(!checkStr(commName,MAX_COMM_NAME_SIZE))
+    {
+        cout << "商品名称输入不合法，发布失败！" << endl << endl;
+        return;
+    }
+    cout << "请输入商品价格：";
+    cin >> price;
+    char ch = getc(stdin);
+    ungetc(ch, stdin);
+    if(cin.fail() || ch != '\n')
+    {
+        cin.clear();
+        cin.ignore(HUGE_NUM,'\n');
+        cout << "商品价格输入不合法，发布失败！" << endl << endl;
+        return;
+    }
+    cout << "请输入商品数量：";
+    cin >> amount;
+    ch = getc(stdin);
+    ungetc(ch,stdin);
+    if(cin.fail() || ch != '\n')
+    {
+        cin.clear();
+        cin.ignore(HUGE_NUM,'\n');
+        cout << "商品数量输入不合法，发布失败！" << endl << endl;
+        return;
+    }
+    cout << "请输入商品描述：";
+    getline(cin, description);
+    if(!checkStr(description,MAX_COMM_DESCRIPTION_SIZE))
+    {
+        cout << "商品描述输入不合法，发布失败！" << endl << endl;
+        return;
+    }
+    cout << starStr << endl;
+    cout << "请确认要发布的商品信息无误：" << endl;
+    cout << '商品名称：' << commName << endl;
+    cout << "商品价格：" << price << endl;
+    cout << "商品数量：" << amount << endl;
+    cout << "商品描述：" << description << endl;
+    cout << starStr << endl;
+    cout << "是否确认发布?(y/n)" << endl;
+    char ch;
+    cout << "请输入：" ;
+    cin >> ch;
+    cin.ignore(HUGE_NUM,'\n');
+    if(tolower(ch) == 'y')
+    {
+        releasedComm[commSize].
+    }
+    else
+        cout << "商品发布失败！" << endl;
+
 
 }

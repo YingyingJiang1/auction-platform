@@ -9,18 +9,14 @@ class User: public BaseUser
 {
 private:
 	double balance;
-	string phone;
-	string address;
+	string id;
+	std::string phone;
+	std::string address;
+	CommodityEntry* releasedComm;
+	int commSize;
 public:
 	User(){}
-    User(string n, string p): BaseUser(n, p)
-    {
-        UsrInfo usrInfo;
-		file.getUsrInfo(name, &usrInfo);
-		balance = usrInfo.balance;
-		phone = usrInfo.phone;
-		address = usrInfo.address;
-    }
+    User(std::string n, std::string p, int size);
 	void auction();
 	void buy();
 	void releaseCommodity()const;
