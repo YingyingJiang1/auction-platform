@@ -5,6 +5,7 @@ using namespace std;
 #include"type.h"
 #include"fileEntry.h"
 #include"strCompare.h"
+#include"macro.h"
 #include<iostream>
 
 
@@ -28,6 +29,7 @@ private:
 	void overflowProcess();
 	void assignCurDate(char*);
 	void assignID(char, char*, int);
+	int getIndex(string id) const;
 public:
     RuntimeFile(int defaultSize = 100);
     ~RuntimeFile();		
@@ -39,6 +41,8 @@ public:
 	bool find(const string ) const;
 	void showUsers()const;
 	void showCommodities()const;
+	void showCommDetail(string )const;
+	void showSpecificComms(string name, int flag) const;
 	void showOrders()const;
 	void modifyUserInfo(int, string,string);
 	void modifyUserBal(string, double);

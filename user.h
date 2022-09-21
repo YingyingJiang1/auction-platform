@@ -3,13 +3,9 @@
 #include"fileEntry.h"
 #include"runtimeFile.h"
 #include"strCompare.h"
+#include"macro.h"
+
 #define HUGE_NUM 0X7FFFFFFF
-#define MAX_COMM_NAME_SIZE 20
-#define MAX_COMM_DESCRIPTION_SIZE 200
-#define MAX_NAME_SIZE 10
-#define MAX_PASSEWD_SIZE 20
-#define MAX_PHONENUMBER_SIZE 20
-#define MAX_ADDRESS_SIZE 40
 
 extern RuntimeFile file;
 class User
@@ -20,6 +16,16 @@ private:
 	int size;
 	int commSize;
 	void overflowProcess();
+	int getCommIndex(string &id) const
+	{
+		int i = 0;
+		for(; i < commSize; ++i)
+        {
+            if(equal(id, releasedComms[i]->id))
+                break;
+        }
+		return i;
+	}
 public:
 	User(){}
     User(const std::string,int defaultSize = 200);
@@ -35,7 +41,6 @@ public:
 	void searchCommodity()const;
 	void  topUp();
 	void viewUserInfo()const;
-    void viewCommodities() const ;	
 	void viewCommDetail() const;
 	void viewBuyerOrders() const;
 	void viewSellerOrders() const ;

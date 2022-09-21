@@ -1,6 +1,6 @@
 #ifndef FILE_ENTRY_H
 #define FILE_ENTRY_H
-
+#define ID_SIZE 4
 typedef struct UserEntry
 {
     double balance;
@@ -35,4 +35,13 @@ typedef struct OrderEntry
     char date[11]; 
 }OrderEntry;
 
+#define ON_AUCTION 1
+#define REMOVED 0
+
+#define MAX_COMM_NAME_SIZE 20
+#define MAX_COMM_DESCRIPTION_SIZE 200
+#define MAX_NAME_SIZE 10
+#define MAX_PASSEWD_SIZE 20
+#define MAX_PHONENUMBER_SIZE 20
+#define MAX_ADDRESS_SIZE 40
 #endif

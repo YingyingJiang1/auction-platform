@@ -1,5 +1,16 @@
 #include "interface.h"
-
+void exitRun()
+{
+    char ch;
+    for(int i = 1; i <= 4; ++i)
+    {
+        ch = getc(stdin);
+        ungetc(ch,stdin);
+        if(ch != '\n')
+            return;
+    }
+    exit(1);
+}
 void enterAdmIntf(Administrator *);
 void enterUserIntf(User *);
 extern string starStr;
@@ -20,8 +31,8 @@ void mainIntf(RuntimeFile *file)
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            cout << "输入不合法，请输入正确的操作编号！" << endl
-                 << endl;
+            exitRun();
+            cout << "输入不合法，请输入正确的操作编号！" << endl << endl;
             cin.clear();
             cin.ignore(HUGE_NUM, '\n');
             continue;
@@ -62,8 +73,8 @@ void enterAdmIntf(Administrator *adm)
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            cout << "输入不合法，请输入正确的操作编号！" << endl
-                 << endl;
+            exitRun();
+            cout << "输入不合法，请输入正确的操作编号！" << endl<< endl;
             cin.clear();
             cin.ignore(HUGE_NUM, '\n');
             continue;
@@ -109,6 +120,7 @@ void enterBuyerIntf(User *user)
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
+            exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
             cin.clear();
@@ -119,7 +131,7 @@ void enterBuyerIntf(User *user)
         switch (seq)
         {
         case BUYER_VIEW_COMM_LIST:
-            user->viewCommodities();
+            user->viewReleasedComm();
             break;
         case BUYER_BUY_COMM:
             user->buy();
@@ -153,8 +165,8 @@ void enterSellerIntf(User *user)
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            cout << "输入不合法，请输入正确的操作编号！" << endl
-                 << endl;
+            exitRun();
+            cout << "输入不合法，请输入正确的操作编号！" << endl<< endl;
             cin.clear();
             cin.ignore(HUGE_NUM, '\n');
             continue;
@@ -180,8 +192,7 @@ void enterSellerIntf(User *user)
         case SELLER_BACK_TO_USER_INTF:
             return;
         default:
-            cout << "输入不合法，请输入正确的操作编号！" << endl
-                 << endl;
+            cout << "输入不合法，请输入正确的操作编号！" << endl << endl;
         }
     }
 }
@@ -197,6 +208,7 @@ void enterInfoManageIntf(User *user)
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
+        exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
             cin.clear();
@@ -236,6 +248,7 @@ void enterUserIntf(User *user)
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
+            exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
             cin.clear();

@@ -3,8 +3,10 @@
 #include<cstdio>
 #include<ctime>
 #define ID_SIZE 4
-#define ON_AUCTION 1
-#define REMOVED 0
+#define PRINT_COMM_ATTRS_VALUE \
+printf("%-6s    %-20s   %-10lf   %-10s     %-10d   %-10s     %-10d\n",\
+            commoditiesFile[i].id, commoditiesFile[i].name, commoditiesFile[i].price, commoditiesFile[i].addedDate,\
+            commoditiesFile[i].number, commoditiesFile[i].sellerID, commoditiesFile[i].state)
 string starStr = "***************************************************************************************************************";
 
 RuntimeFile::RuntimeFile(int defaultSize )
@@ -108,7 +110,16 @@ bool RuntimeFile::find(const string name) const
     return false;
 }
 
-
+int RuntimeFile::getIndex(string id) const
+{
+    int i = 0;
+    for(; i < commSize; ++i)
+    {
+        if(equal(id, commoditiesFile[i].id))
+            break;
+    }
+    return i;
+}
 
 
 LogFlag RuntimeFile::matching(const string name, string passwd) const
@@ -171,51 +182,10 @@ void RuntimeFile::modifyUserInfo(int flag, string userName, string newInfo)
 
     writeUsersFile("w");
 }
-bool checkID(string userID)
-{
-    if(userID.length() != ID_SIZE || userID[0] != 'U')
-        return false;
-    for(int i = 1; i < ID_SIZE; ++i)
-        if(!isdigit(userID[i]))
-            return false;
-    return true;
-}
+
 void RuntimeFile::modifyUserState()
 {
-    string userID;
-    std::cout << "请输入要封禁的用户的ID：" ;
-    getline(cin,userID);
-   if(checkID(userID))
-   {
-        for(int i = 0; i < usersSize; ++i)
-        {
-            if(equal(userID, usersFile[i].id))
-            {
-                std::cout << "是否确认封禁该用户?" << endl;
-                std::cout << starStr << endl;
-                printf("%-6s    %-10s   %-20s   %-40s   %-10s\n",
-                            "UserID","UserName","PhoneNumber","Address","Balance");
-                printf("%-6s    %-10s   %-20s   %-40s   %-10lf\n",
-                            usersFile[i].id, usersFile[i].name, usersFile[i].phone, usersFile[i].address,usersFile[i].balance);
-                std::cout << starStr << endl;
-                std::cout << "请输入(y/n): ";
-                char ch;
-                cin >> ch;
-                if(tolower(ch) == 'y')
-                {
-                    usersFile[i].state = INACTIVE;
-                    writeUsersFile("w");
-                    std::cout << "封禁成功！" << endl << endl;
-                }
-                else
-                    std::cout << "封禁失败！" << endl << endl;
-                return;
-            }
-        }
-        std::cout << "用户ID不存在，封禁失败！" << endl <<endl;
-   }
-    else
-        std::cout << "非法ID，封禁失败！" << endl << endl;
+    
 }
 
 
@@ -225,16 +195,47 @@ void RuntimeFile::overflowProcess()
     
 }
 
-void RuntimeFile::readToComms()
-{
-
-}
 /*用户文件结构：userID userName passewd phone address balance userState*/
 /*商品文件结构：commID commName price number description sellerID addedDate state*/
 /*订单文件结构：orderID commID unitPrice number date sellerID buyerID*/
+void RuntimeFile::readToComms()
+{
+    FILE* input = fopen("commodities.txt", "r");
+    int ret = 0;
+    if(input)
+    {    
+        while(1)
+        {
+            ret = fscanf(input, "%[^,]%*c%[^,]%*c%lf%*c%d%*c%[^,]%*c%[^,]%*c%[^,]%*c%d\n",
+                                commoditiesFile[commSize].id, commoditiesFile[commSize].name,&commoditiesFile[commSize].price,
+                                &commoditiesFile[commSize].number, commoditiesFile[commSize].description,
+                                commoditiesFile[commSize].sellerID,commoditiesFile[commSize].addedDate,&commoditiesFile[commSize].state);
+            if(ret != 8)
+                break;
+            ++commSize;
+        }
+        fclose(input);
+    }
+}
+
 void RuntimeFile::readToOrders()
 {
-   
+   FILE* input = fopen("orders.txt", "r");
+    int ret = 0;
+    if(input)
+    {    
+        while(1)
+        {
+           ret = fscanf(input, "%[^,]%*c%[^,]%*c%lf%*c%d%*c%[^,]%*c%[^,]%*c%[^,]%*c\n",
+                                ordersFile[orderSize].id, ordersFile[orderSize].commodityID,&ordersFile[orderSize].unitPrice,
+                                &ordersFile[orderSize].number, ordersFile[orderSize].date,ordersFile[orderSize].sellerID,
+                                ordersFile[orderSize].buyerID);
+            if(ret != 7)
+                break;
+            ++orderSize;
+        }
+        fclose(input);
+    }
 }
 
 void RuntimeFile::readToUsers()
@@ -259,7 +260,51 @@ void RuntimeFile::readToUsers()
 
 void RuntimeFile::showCommodities() const
 {
+    cout << starStr << endl;
+    PRINT_COMM_ATTRS_NAME;
+    for(int i = 0; i < commSize; ++i)
+    {
+        PRINT_COMM_ATTRS_VALUE;
+    }
+}
 
+void RuntimeFile::showCommDetail(string id) const
+{
+    int i = getIndex(id);
+    cout << starStr << endl;
+    cout << "商品ID：" << commoditiesFile[i].id << endl;
+    cout << "商品名称：" << commoditiesFile[i].name << endl;
+    cout << "商品价格：" << commoditiesFile[i].price << endl;
+    cout << "上架时间：" << commoditiesFile[i].addedDate << endl;
+    cout << "商品描述：" << commoditiesFile[i].description << endl;
+    cout << "商品买家：" << commoditiesFile[i].sellerID << endl;
+    cout << starStr << endl;
+}
+
+void RuntimeFile::showSpecificComms(string name, int flag) const
+{
+    /*管理员的flag设置为1， 用户的flag设置为0*/
+    cout << starStr << endl;
+    bool noOutput = true;
+    int i = 0;
+    for(; i < commSize; ++i)
+    {
+        if(equal(name, commoditiesFile[i].name) && (flag || commoditiesFile[i].state))
+        {
+            noOutput = false;
+            break;
+        }
+    }
+    if(noOutput)
+        cout << "没有找到您想要的商品！返回管理员主界面！" << endl ;
+    else
+    {
+        PRINT_COMM_ATTRS_NAME;
+        for(; i < commSize; ++i)
+            if(equal(name, commoditiesFile[i].name) && (flag || commoditiesFile[i].state))
+                PRINT_COMM_ATTRS_VALUE;
+    }   
+    cout << starStr << endl;
 }
 
 void RuntimeFile::showOrders() const
@@ -270,8 +315,7 @@ void RuntimeFile::showOrders() const
 void RuntimeFile::showUsers() const
 {
     std::cout << starStr << endl;
-    printf("%-6s    %-10s   %-20s   %-40s   %-10s   %-10s\n",
-                "UserID","UserName","PhoneNumber","Address","Balance","UserState");
+    PRINT_USER_ATTRS_NAME;
     for(int i = 0; i < usersSize; ++i)
     {
         printf("%-6s    %-10s   %-20s   %-40s   %-10lf   ",

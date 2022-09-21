@@ -1,7 +1,10 @@
 #include"user.h"
-
 extern std::string starStr;
 bool checkAlnum(std::string,int);
+#define PRINT_COMM_ATTRS_VALUE \
+printf("%-6s    %-20s   %-10lf   %-10s     %-10d   %-10s     %-10d\n",\
+            releasedComms[i]->id, releasedComms[i]->name, releasedComms[i]->price, releasedComms[i]->addedDate,\
+            releasedComms[i]->number, releasedComms[i]->sellerID, releasedComms[i]->state)
 
 User::User(const std::string name,int defaultSize )
 {
@@ -19,6 +22,8 @@ User::User(const std::string name,int defaultSize )
     assign the address of each released commodity to each pointer*/
     commSize = 0;
     releasedComms = new CommodityEntry*[size];
+    cout << file.commSize << endl;
+
     for(int i = 0; i < file.commSize; ++i)
     {
         if(equal(userInfo->id, file.commoditiesFile[i].sellerID))
@@ -39,103 +44,177 @@ void User::buy()
 
 void User::modifyCommInfo() const
 {
-
+    int seq;
+    string id;    
+    std::cout << "请输入要修改的商品的ID：";
+    std::getline(std::cin, id);
+    if(checkID('M', id))
+    {
+        int i = getCommIndex(id);
+        
+        if(i == commSize)
+        {
+            PROMPT_MODIFICATION_FAILURE("未在您发布的商品中找到该ID的商品");
+            return;
+        }
+        std::cout << "请输入要修改的商品的属性(1.价格 2.描述）：";
+        std::cin >> seq;
+        if(!checkNum)
+            PROMPT_OPERATION_NUMBER_ERROR;
+        else
+        {
+            std::cin.ignore(HUGE_NUM, '\n');
+            /*修改商品价格*/
+            if(seq == 1)
+            {
+                double price;
+                cout << "请输入新的价格：";
+                std::cin >> price;
+                if(checkNum())
+                {
+                    releasedComms[i]->price = price;
+                    file.writeCommsFile("w");
+                    PROMPT_MODIFICATION_SUCCEEED;
+                }
+                else
+                    PROMPT_MODIFICATION_FAILURE("商品价格输入不合法");
+            }
+            /*修改商品描述*/
+            else if(seq == 2)
+            {
+                string description;
+                cout << "请输入新的描述：";
+                std::getline(cin ,description);
+                if(checkAlnum(description, MAX_COMM_DESCRIPTION_SIZE))
+                {
+                    assignment(description, releasedComms[i]->description);
+                    file.writeCommsFile("w");
+                    PROMPT_MODIFICATION_SUCCEEED;
+                }
+                else
+                    PROMPT_MODIFICATION_FAILURE("商品描述输入不合法");
+            }
+            else
+                PROMPT_MODIFICATION_FAILURE("该属性不存在");
+        }
+    }
+    /*商品ID不是"M+三位数字"的形式*/
+    else
+        PROMPT_MODIFICATION_FAILURE("商品ID输入不合法");
 }
 
 void User::pullCommodity()
 {
+    string id;
+    cout << "请输入要下架的商品的ID：";
+    std::getline(cin ,id);
+    if(checkID('M', id))
+    {
+        int i = 0; 
+        for(; i < commSize; ++i)
+            if(equal(id, releasedComms[i]->id))
+                break;
+        if(i == commSize)
+        {
+            PROMPT_MODIFICATION_FAILURE("未在您发布的商品中找到该ID的商品");
+            return;
+        }
 
+        std::cout << "确认要下架该商品吗？" << std::endl;
+        std::cout << starStr << std::endl;
+        PRINT_COMM_ATTRS_NAME;
+        PRINT_COMM_ATTRS_VALUE;        
+        std::cout << starStr << std::endl;  
+
+        std::cout << "请选择(y/n):";
+        char confirm;
+        std::cin >> confirm;
+        if(tolower(confirm) == 'y')
+        {
+            releasedComms[i]->state = REMOVED;
+            file.writeCommsFile("w");
+            std::cout << "下架成功！" << std::endl << std::endl;
+        }
+        else
+            std::cout << "下架失败！" << std::endl << std::endl;
+    }
+    /*商品ID不是"M+三位数字"的形式*/
+    else
+        PROMPT_MODIFICATION_FAILURE("商品ID输入不合法");
 }
 
-/*检查字符串是否由数字组成且符合长度要求*/
-bool checkNum(std::string str, int size)
-{
-    if(str.length() > size || str.length() == 0)
-        return false;
-    for(int i = 0; i < str.length(); ++i)
-        if(!isdigit(str[i]))
-            return false;
-    return true;
-}
 
-/*检查字符串是否不包含“,”且符合长度要求*/
-bool checkStr(std::string str, int size)
-{
-    if(str.length() > size || str.length() == 0)
-        return false;
-    for(int i = 0; i < str.length(); ++i)
-        if(str[i] == ',')
-            return false;
-    return true;
-}
 
 void User::modifyUserInfo()
 {
     int seq;
     std::cout << "请选择要修改的属性(1. 用户名  2. 联系方式  3.地址) :";
     cin >> seq;
-    if(cin.fail())
-    {
-        cin.clear();
-        cin.ignore();
-        std::cout << "输入不合法，修改失败！" << endl << endl;
-    }
+    if(!checkNum())
+        PROMPT_OPERATION_NUMBER_ERROR;
     else
     {
         cin.ignore(HUGE_NUM,'\n');
-        if(1 == seq)
+        switch (seq)
         {
-            std::cout << starStr << endl;
-            std::cout << "请注意用户名只能由英文字母和数字构成且不能超过10个字符" << endl;
-            std::cout << starStr << endl;
-            std::cout << "请输入修改后的用户名：" ;
-            std::string newName;
-            getline(cin, newName);
-            if(checkAlnum(newName,MAX_NAME_SIZE))
+            case 1:
             {
-                if(file.find(newName))
-                    std::cout << "用户名已存在，修改失败！" << endl << endl;
-                else
+                std::cout << starStr << endl;
+                std::cout << "请注意用户名只能由英文字母和数字构成且不能超过10个字符" << endl;
+                std::cout << starStr << endl;
+                std::cout << "请输入修改后的用户名：" ;
+                std::string newName;
+                getline(cin, newName);
+                if(checkAlnum(newName,MAX_NAME_SIZE))
                 {
-                    assignment(newName, userInfo->name);
+                    if(file.find(newName))
+                        PROMPT_MODIFICATION_FAILURE("用户名已存在");
+                    else
+                    {
+                        assignment(newName, userInfo->name);
+                        file.writeUsersFile("w");
+                        PROMPT_MODIFICATION_SUCCEEED;
+                    }                   
+                }
+                else
+                    PROMPT_MODIFICATION_FAILURE("用户名不合法");
+                break;
+            }
+            case 2:
+            {
+                std::cout << "请输入修改后的联系方式：" ;
+                std::string newPhone;
+                getline(cin, newPhone);
+                if(checkDigits(newPhone,MAX_PHONENUMBER_SIZE))
+                {
+                    assignment(newPhone, userInfo->phone);
                     file.writeUsersFile("w");
-                    std::cout << "修改成功！" << endl << endl;
-                }                   
-            }
-            else
-                std::cout << "用户名不合法，修改失败！" << endl << endl;
-        }
-        else if(2 == seq)
-        {            
-            std::cout << "请输入修改后的联系方式：" ;
-            std::string newPhone;
-            getline(cin, newPhone);
-            if(checkNum(newPhone,MAX_PHONENUMBER_SIZE))
+                    PROMPT_MODIFICATION_SUCCEEED;            
+                }
+                else
+                    PROMPT_MODIFICATION_FAILURE("联系方式不合法");
+                break;
+            } 
+            case 3:
             {
-                assignment(newPhone, userInfo->phone);
-                file.writeUsersFile("w");
-                std::cout << "修改成功！" << endl << endl;                  
+                std::cout << starStr << endl;
+                std::cout << "请不要在您的地址中包含“,” " << endl;
+                std::cout << starStr << endl;
+                std::cout << "请输入修改后的地址：" ;
+                std::string newAddress;
+                getline(cin, newAddress);
+                if(checkStr(newAddress,MAX_ADDRESS_SIZE))
+                {
+                    assignment(newAddress, userInfo->address);
+                    file.writeUsersFile("w");
+                    PROMPT_MODIFICATION_SUCCEEED;                          
+                }
+                else
+                    PROMPT_MODIFICATION_FAILURE("地址不合法");
             }
-            else
-                std::cout << "联系方式不合法，修改失败！" << endl << endl;
-        }
-        else  if(3 == seq)
-        {
-            std::cout << starStr << endl;
-            std::cout << "请不要在您的地址中包含“,” " << endl;
-            std::cout << starStr << endl;
-            std::cout << "请输入修改后的地址：" ;
-            std::string newAddress;
-            getline(cin, newAddress);
-            if(checkStr(newAddress,MAX_ADDRESS_SIZE))
-            {
-                assignment(newAddress, userInfo->address);
-                file.writeUsersFile("w");
-                std::cout << "修改成功！" << endl << endl;                  
-            }
-            else
-                std::cout << "地址不合法，修改失败！" << endl << endl;
-        }
+            default:
+                PROMPT_OPERATION_NUMBER_ERROR;          
+        }            
     }
 }
 
@@ -154,7 +233,7 @@ void User::releaseCommodity()
     getline(cin, commName);
     if(!checkStr(commName,MAX_COMM_NAME_SIZE))
     {
-        cout << "商品名称输入不合法，发布失败！" << endl << endl;
+        PROMPT_MODIFICATION_FAILURE("用户名已存在");
         return;
     }
 
@@ -219,7 +298,10 @@ void User::releaseCommodity()
 
 void User::searchCommodity() const
 {
-
+    string name;
+    getline(cin , name);
+    std::cout << "请输入商品名称：" ;
+    file.showSpecificComms(name, 0);    
 }
 
 void User::topUp()
@@ -257,16 +339,17 @@ void User::viewUserInfo() const
     cout << "地址：" <<userInfo-> address << endl;
     cout << "钱包余额：" << userInfo->balance << endl;
     cout << starStr << endl;
-}
-	
-void User::viewCommodities() const 
-{
-
 }	
 
 void User::viewCommDetail() const
 {
-
+    string id;
+    cout << "请输入您想要查看的商品的ID：";
+    getline(cin, id);
+    if(checkID('M', id))
+        file.showCommDetail(id);
+    else
+        cout << "商品ID输入不合法！" << endl << endl;
 }
 
 void User::viewBuyerOrders() const
@@ -281,6 +364,10 @@ void User::viewSellerOrders() const
 
 void User::viewReleasedComm() const
 {
-
+    cout << starStr << endl;
+    PRINT_COMM_ATTRS_NAME;    
+    for(int i = 0; i < commSize; ++i)
+        PRINT_COMM_ATTRS_VALUE;
+    cout << starStr << endl;
 }
 
