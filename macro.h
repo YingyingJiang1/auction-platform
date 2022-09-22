@@ -14,4 +14,30 @@ printf("%-6s    %-20s   %-10s   %-10s     %-10s   %-10s     %-10s\n",\
 printf("%-6s    %-10s   %-20s   %-40s   %-10s   %-10s\n", \
                 "UserID","UserName","PhoneNumber","Address","Balance","UserState")
             
+#define PRINT_BUYER_ORDER_ATTRS_NAME \
+printf("%-6s    %-6s   %-10s   %-10s   %-10s   %-10s\n", \
+            "OrderID", "CommID", "UnitPrice", "Amount", "Date", "SellerID")
+
+#define PRINT_BUYER_ORDER_ATTRS_VALUE \
+printf("%-6s    %-6s   %-10lf   %-10d   %-10s   %-10s\n", \
+                    buyOrder[i]->buyerID, buyOrder[i]->commodityID, buyOrder[i]->unitPrice, \
+                    buyOrder[i]->number, buyOrder[i]->date, buyOrder[i]->sellerID)
+
+#define PRINT_SELLER_ORDER_ATTRS_NAME \
+printf("%-6s    %-6s   %-10s   %-10s   %-10s   %-10s\n", \
+            "OrderID", "CommID", "UnitPrice", "Amount", "Date", "BuyerID")
+
+#define PRINT_SELLER_ORDER_ATTRS_VALUE \
+printf("%-6s    %-6s   %-10lf   %-10d   %-10s   %-10s\n", \
+                    buyOrder[i]->buyerID, buyOrder[i]->commodityID, buyOrder[i]->unitPrice, \
+                    buyOrder[i]->number, buyOrder[i]->date, buyOrder[i]->buyerID)
+
+#define PRINT_ORDER_ATTRS_NAME \
+printf("%-6s    %-6s   %-10s   %-10s   %-10s   %-10s    %-10s\n", \
+            "OrderID", "CommID", "UnitPrice", "Amount", "Date", "SellerID","BuyerID")
+
+#define PRINT_ORDER_ATTRS_VALUE \
+printf("%-6s    %-6s   %-10lf   %-10d   %-10s   %-10s   %-10s\n", \
+            ordersFile[i].id, ordersFile[i].commodityID, ordersFile[i].unitPrice, \
+            ordersFile[i].number, ordersFile[i].date, ordersFile[i].sellerID, ordersFile[i].buyerID)
 #endif

@@ -13,22 +13,17 @@ class User
 private:
 	UserEntry* userInfo;
 	CommodityEntry** releasedComms;
+	OrderEntry** buyOrder;
+	OrderEntry** sellOrder;
 	int size;
 	int commSize;
+	int buySize;
+	int sellSize;
 	void overflowProcess();
-	int getCommIndex(string &id) const
-	{
-		int i = 0;
-		for(; i < commSize; ++i)
-        {
-            if(equal(id, releasedComms[i]->id))
-                break;
-        }
-		return i;
-	}
+	int getCommIndex(string &id) const;
 public:
 	User(){}
-    User(const std::string,int defaultSize = 200);
+    User(const std::string,int defaultSize = 20000);
 	~User(){
 		delete [] releasedComms;
 	}

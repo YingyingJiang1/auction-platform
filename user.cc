@@ -22,14 +22,23 @@ User::User(const std::string name,int defaultSize )
     assign the address of each released commodity to each pointer*/
     commSize = 0;
     releasedComms = new CommodityEntry*[size];
-    cout << file.commSize << endl;
-
     for(int i = 0; i < file.commSize; ++i)
     {
         if(equal(userInfo->id, file.commoditiesFile[i].sellerID))
             releasedComms[commSize++] = &file.commoditiesFile[i];
     }
 
+    buySize = 0;
+    sellSize = 0;
+    buyOrder = new OrderEntry*[size];
+    sellOrder = new OrderEntry*[size];
+    for(int i =0; i < file.orderSize; ++i)
+    {
+        if(equal(userInfo->id, file.ordersFile[i].buyerID))
+            buyOrder[buySize++] = &file.ordersFile[i];
+        else if(equal(userInfo->id, file.ordersFile[i].sellerID))
+            sellOrder[sellSize++] = &file.ordersFile[i];
+    }
 }
 
 void User::auction()
@@ -39,8 +48,66 @@ void User::auction()
 
 void User::buy()
 {
-
+    string id;
+    std::cout << "请输入商品ID：";
+    getline(cin, id);
+    if(checkID('M', id))
+    {
+        int num;
+        std::cin >> num;
+        if(checkNum())
+        {
+            int i = file.getIndex(id);
+            if(i == file.commSize || file.commoditiesFile[i].state == REMOVED)
+                std::cout << "没有找到该ID的商品！" << std::endl << std::endl;
+            else
+            {
+                int left = file.commoditiesFile[i].number;
+                if(num <= left)
+                {
+                    if(userInfo->balance >= file.commoditiesFile[i].price * left)
+                    {
+                        int sum = file.commoditiesFile[i].price * left;
+                        int j = file.getIndex(file.commoditiesFile[i].sellerID);
+                        userInfo->balance -= sum;                        
+                        file.commoditiesFile[i].number -= num;                        
+                        file.usersFile[j].balance += sum;
+                        buyOrder[buySize++] = file.addOrder(i, num, userInfo->id);
+                        file.writeCommsFile("w");
+                        file.writeUsersFile("w");
+                        cout << starStr << endl;
+                        cout << "交易提醒！" << endl;
+                        cout << "交易时间：" << buyOrder[buySize-1]->date << endl;
+                        cout << "交易单价：" << buyOrder[buySize-1]->unitPrice << endl;
+                        cout << "交易数量：" << num << endl;
+                        cout << "交易状态：交易成功" << endl; 
+                        cout << "您的余额：" << userInfo->balance << endl;
+                        cout << starStr << endl;
+                    }
+                    else
+                        cout << "余额不足，请充值！" << endl << endl;
+                }
+                else
+                    std::cout << "该商品剩余数量为 " << file.commoditiesFile[i].number << " ，购买失败！" << std::endl << std::endl;
+            }                            
+        }      
+        else
+            std::cout << "商品数量输入不合法！" << std::endl << std::endl; 
+    }
+    else
+        std::cout << "商品ID输入不合法！" << std::endl << std::endl;
 }
+
+int User::getCommIndex(string &id) const
+	{
+		int i = 0;
+		for(; i < commSize; ++i)
+        {
+            if(equal(id, releasedComms[i]->id))
+                break;
+        }
+		return i;
+	}
 
 void User::modifyCommInfo() const
 {
@@ -68,7 +135,7 @@ void User::modifyCommInfo() const
             if(seq == 1)
             {
                 double price;
-                cout << "请输入新的价格：";
+                std::cout << "请输入新的价格：";
                 std::cin >> price;
                 if(checkNum())
                 {
@@ -83,8 +150,8 @@ void User::modifyCommInfo() const
             else if(seq == 2)
             {
                 string description;
-                cout << "请输入新的描述：";
-                std::getline(cin ,description);
+                std::cout << "请输入新的描述：";
+                std::getline(std::cin ,description);
                 if(checkAlnum(description, MAX_COMM_DESCRIPTION_SIZE))
                 {
                     assignment(description, releasedComms[i]->description);
@@ -106,8 +173,8 @@ void User::modifyCommInfo() const
 void User::pullCommodity()
 {
     string id;
-    cout << "请输入要下架的商品的ID：";
-    std::getline(cin ,id);
+    std::cout << "请输入要下架的商品的ID：";
+    std::getline(std::cin ,id);
     if(checkID('M', id))
     {
         int i = 0; 
@@ -149,22 +216,22 @@ void User::modifyUserInfo()
 {
     int seq;
     std::cout << "请选择要修改的属性(1. 用户名  2. 联系方式  3.地址) :";
-    cin >> seq;
+    std::cin >> seq;
     if(!checkNum())
         PROMPT_OPERATION_NUMBER_ERROR;
     else
     {
-        cin.ignore(HUGE_NUM,'\n');
+        std::cin.ignore(HUGE_NUM,'\n');
         switch (seq)
         {
             case 1:
             {
-                std::cout << starStr << endl;
-                std::cout << "请注意用户名只能由英文字母和数字构成且不能超过10个字符" << endl;
-                std::cout << starStr << endl;
+                std::cout << starStr << std::endl;
+                std::cout << "请注意用户名只能由英文字母和数字构成且不能超过10个字符" << std::endl;
+                std::cout << starStr << std::endl;
                 std::cout << "请输入修改后的用户名：" ;
                 std::string newName;
-                getline(cin, newName);
+                std::getline(std::cin, newName);
                 if(checkAlnum(newName,MAX_NAME_SIZE))
                 {
                     if(file.find(newName))
@@ -184,7 +251,7 @@ void User::modifyUserInfo()
             {
                 std::cout << "请输入修改后的联系方式：" ;
                 std::string newPhone;
-                getline(cin, newPhone);
+                std::getline(std::cin, newPhone);
                 if(checkDigits(newPhone,MAX_PHONENUMBER_SIZE))
                 {
                     assignment(newPhone, userInfo->phone);
@@ -197,12 +264,12 @@ void User::modifyUserInfo()
             } 
             case 3:
             {
-                std::cout << starStr << endl;
-                std::cout << "请不要在您的地址中包含“,” " << endl;
-                std::cout << starStr << endl;
+                std::cout << starStr << std::endl;
+                std::cout << "请不要在您的地址中包含“,” " << std::endl;
+                std::cout << starStr << std::endl;
                 std::cout << "请输入修改后的地址：" ;
                 std::string newAddress;
-                getline(cin, newAddress);
+                std::getline(std::cin, newAddress);
                 if(checkStr(newAddress,MAX_ADDRESS_SIZE))
                 {
                     assignment(newAddress, userInfo->address);
@@ -229,69 +296,69 @@ void User::releaseCommodity()
     double price;
     int amount;
 
-    cout << "请输入商品名称：";
-    getline(cin, commName);
+    std::cout << "请输入商品名称：";
+    std::getline(std::cin, commName);
     if(!checkStr(commName,MAX_COMM_NAME_SIZE))
     {
         PROMPT_MODIFICATION_FAILURE("用户名已存在");
         return;
     }
 
-    cout << "请输入商品价格：";
-    cin >> price;
+    std::cout << "请输入商品价格：";
+    std::cin >> price;
     char ch = getc(stdin);
     ungetc(ch, stdin);
-    if(cin.fail() || ch != '\n')
+    if(std::cin.fail() || ch != '\n')
     {
-        cin.clear();
-        cin.ignore(HUGE_NUM,'\n');
-        cout << "商品价格输入不合法，发布失败！" << endl << endl;
+        std::cin.clear();
+        std::cin.ignore(HUGE_NUM,'\n');
+        std::cout << "商品价格输入不合法，发布失败！" << std::endl << std::endl;
         return;
     }
 
-    cout << "请输入商品数量：";
-    cin >> amount;
+    std::cout << "请输入商品数量：";
+    std::cin >> amount;
     ch = getc(stdin);
     //ungetc(ch,stdin);
-    if(cin.fail() || ch != '\n')
+    if(std::cin.fail() || ch != '\n')
     {
-        cin.clear();
-        cin.ignore(HUGE_NUM,'\n');
-        cout << "商品数量输入不合法，发布失败！" << endl << endl;
+        std::cin.clear();
+        std::cin.ignore(HUGE_NUM,'\n');
+        std::cout << "商品数量输入不合法，发布失败！" << std::endl << std::endl;
         return;
     }
 
-    cout << "请输入商品描述：";
-    getline(cin, description);
+    std::cout << "请输入商品描述：";
+    std::getline(std::cin, description);
     if(!checkStr(description,MAX_COMM_DESCRIPTION_SIZE))
     {
-        cout << "商品描述输入不合法，发布失败！" << endl << endl;
+        std::cout << "商品描述输入不合法，发布失败！" << std::endl << std::endl;
         return;
     }
 
-    cout << starStr << endl;
-    cout << "请确认要发布的商品信息无误：" << endl;
-    cout << "商品名称：" << commName << endl;
-    cout << "商品价格：" << price << endl;
-    cout << "商品数量：" << amount << endl;
-    cout << "商品描述：" << description << endl;
-    cout << starStr << endl;
-    cout << "是否确认发布?(y/n)" << endl;
+    std::cout << starStr << std::endl;
+    std::cout << "请确认要发布的商品信息无误：" << std::endl;
+    std::cout << "商品名称：" << commName << std::endl;
+    std::cout << "商品价格：" << price << std::endl;
+    std::cout << "商品数量：" << amount << std::endl;
+    std::cout << "商品描述：" << description << std::endl;
+    std::cout << starStr << std::endl;
+    std::cout << "是否确认发布?(y/n)" << std::endl;
 
     char confirm;
-    cout << "请输入：" ;
-    cin >> confirm;
-    cin.ignore(HUGE_NUM,'\n');
+    std::cout << "请输入：" ;
+    std::cin >> confirm;
+    std::cin.ignore(HUGE_NUM,'\n');
     if(tolower(confirm) == 'y')
     {
         if(commSize == size)
             overflowProcess();
         releasedComms[commSize] =  file.addCommodity(commName, price, amount, description, userInfo->id);
         ++commSize;
-        cout << "商品发布成功！" << endl << endl;
+        std::cout << "商品发布成功！" << std::endl << std::endl;
     }
     else
-        cout << "商品发布失败！" << endl << endl;
+        std::cout << "商品发布失败！" << std::endl << std::endl;
 
 
 }
@@ -299,75 +366,83 @@ void User::releaseCommodity()
 void User::searchCommodity() const
 {
     string name;
-    getline(cin , name);
+    std::getline(std::cin , name);
     std::cout << "请输入商品名称：" ;
     file.showSpecificComms(name, 0);    
 }
 
 void User::topUp()
 {
-    cout << starStr << endl;
-    cout << "请不要在您输入金额的中间或者结尾加入任何无关字符，包括空格！" << endl;
-    cout << starStr << endl;
+    std::cout << starStr << std::endl;
+    std::cout << "请不要在您输入金额的中间或者结尾加入任何无关字符，包括空格！" << std::endl;
+    std::cout << starStr << std::endl;
 
     double money;
-    cout << "请输入要充值的金额：" ;
-    cin >> money;
+    std::cout << "请输入要充值的金额：" ;
+    std::cin >> money;
     /*在调用完getc取出回车符后要立即将字符放回，否则程序会等待输入回车符*/
     char ch = getc(stdin);
     ungetc(ch, stdin);
-    if(cin.fail() || money <= 0 || ch != '\n')
+    if(std::cin.fail() || money <= 0 || ch != '\n')
     {
-        cin.clear();
-        cin.ignore(HUGE_NUM, '\n');
-        cout << "输入不合法，充值失败！" << endl << endl;
+        std::cin.clear();
+        std::cin.ignore(HUGE_NUM, '\n');
+        std::cout << "输入不合法，充值失败！" << std::endl << std::endl;
     }
     else
     {
-        cin.ignore(HUGE_NUM, '\n');
+        std::cin.ignore(HUGE_NUM, '\n');
         userInfo->balance += money;
         file.writeUsersFile("w");
-        cout << "充值成功，当前余额：" << userInfo->balance <<  endl << endl;
+        std::cout << "充值成功，当前余额：" << userInfo->balance <<  std::endl << std::endl;
     }
 }
 
 void User::viewUserInfo() const
 {
-    cout << starStr << endl;
-    cout << "用户名：" << userInfo->name << endl;
-    cout << "联系方式：" <<userInfo-> phone << endl;
-    cout << "地址：" <<userInfo-> address << endl;
-    cout << "钱包余额：" << userInfo->balance << endl;
-    cout << starStr << endl;
+    std::cout << starStr << std::endl;
+    std::cout << "用户名：" << userInfo->name << std::endl;
+    std::cout << "联系方式：" <<userInfo-> phone << std::endl;
+    std::cout << "地址：" <<userInfo-> address << std::endl;
+    std::cout << "钱包余额：" << userInfo->balance << std::endl;
+    std::cout << starStr << std::endl;
 }	
 
 void User::viewCommDetail() const
 {
     string id;
-    cout << "请输入您想要查看的商品的ID：";
-    getline(cin, id);
+    std::cout << "请输入您想要查看的商品的ID：";
+    std::getline(std::cin, id);
     if(checkID('M', id))
         file.showCommDetail(id);
     else
-        cout << "商品ID输入不合法！" << endl << endl;
+        std::cout << "商品ID输入不合法！" << std::endl << std::endl;
 }
 
 void User::viewBuyerOrders() const
 {
-
+    cout << starStr << endl;
+    PRINT_BUYER_ORDER_ATTRS_NAME;
+    for(int i = 0; i < buySize; ++i)
+        PRINT_BUYER_ORDER_ATTRS_VALUE;
+    cout << starStr << endl;
 }
 
 void User::viewSellerOrders() const 
 {
-
+    cout << starStr << endl;
+    PRINT_SELLER_ORDER_ATTRS_NAME;
+    for(int i = 0; i < sellSize; ++i)
+        PRINT_SELLER_ORDER_ATTRS_VALUE;
+    cout << starStr << endl;
 }
 
 void User::viewReleasedComm() const
 {
-    cout << starStr << endl;
+    std::cout << starStr << std::endl;
     PRINT_COMM_ATTRS_NAME;    
     for(int i = 0; i < commSize; ++i)
         PRINT_COMM_ATTRS_VALUE;
-    cout << starStr << endl;
+    std::cout << starStr << std::endl;
 }
 

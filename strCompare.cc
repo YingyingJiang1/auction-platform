@@ -11,6 +11,13 @@ void assignment(const string src, char* dest){
     dest[i] = 0;
 }
 
+void assignment(const char* src, char* dest){
+    int i = 0;
+    for(; src[i] != 0; ++i)
+        dest[i] = src[i];
+    dest[i] = 0;
+}
+
 bool equal(const string str1, const char* str2)
 {
     int i = 0;

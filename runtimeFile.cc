@@ -11,7 +11,8 @@ string starStr = "**************************************************************
 
 RuntimeFile::RuntimeFile(int defaultSize )
 {
-    size = defaultSize;
+    size = defaultSize * 10;
+    maxUserSize = defaultSize;
     usersFile = new UserEntry[defaultSize]; 
     commoditiesFile = new CommodityEntry[defaultSize*10];
     ordersFile = new OrderEntry[defaultSize*10];
@@ -59,9 +60,25 @@ CommodityEntry* RuntimeFile::addCommodity(string& name, double price, int amount
     return &commoditiesFile[commSize-1];
 }
 
+OrderEntry* RuntimeFile::addOrder(int index, int num, char* buyerID)
+{
+    if(orderSize == size)
+        overflowProcess();
+    assignID('T', ordersFile[orderSize].id, orderSize+1);
+    assignment(buyerID,ordersFile[orderSize].buyerID ) ;
+    assignment(commoditiesFile[index].sellerID,ordersFile[orderSize].sellerID) ;
+    assignCurDate(ordersFile[orderSize].date);
+    assignment(commoditiesFile[index].id, ordersFile[orderSize].id);
+    ordersFile[orderSize].number = num;
+    ordersFile[orderSize].unitPrice = commoditiesFile[index].price;
+    ++orderSize;
+    writeOrdersFile("a");
+    return &ordersFile[orderSize-1];
+}
+
 void RuntimeFile::addUser(const string name, string passwd)
 {
-    if(usersSize == size)
+    if(usersSize == maxUserSize)
         overflowProcess();
     assignment(name, usersFile[usersSize].name);
     assignment(passwd, usersFile[usersSize].passwd);
@@ -75,12 +92,12 @@ void RuntimeFile::addUser(const string name, string passwd)
    
 }
 
+/*convert the numeric value "amount" to array of char*/
 void RuntimeFile::assignID(char category, char* id, int amount)
 {
     id[0] = category;
     char str[ID_SIZE];
-    /*convert the numeric value "amount" to array of char
-    %03d means if "amount" is less than three digits then make up 0 in front */
+    /*%03d means if "amount" is less than three digits then make up 0 in front */
     sprintf(str, "%03d", amount);
 
     for(int i = 1; i < ID_SIZE; ++i)
@@ -113,10 +130,27 @@ bool RuntimeFile::find(const string name) const
 int RuntimeFile::getIndex(string id) const
 {
     int i = 0;
-    for(; i < commSize; ++i)
+    /*查找商品ID*/
+    if(id[0] == 'M')
     {
-        if(equal(id, commoditiesFile[i].id))
-            break;
+        for(; i < commSize; ++i)
+        {
+            if(equal(id, commoditiesFile[i].id))
+                break;
+        }
+    }
+    /*查找用户ID*/
+    else if(id[0] == 'U')
+    {
+        for(; i < usersSize; ++i)
+            if(equal(id, usersFile[i].id))
+                break;
+    }
+    else
+    {
+        for(; i < orderSize; ++i)
+            if(equal(id, ordersFile[i].id))
+                break;
     }
     return i;
 }
@@ -139,60 +173,22 @@ LogFlag RuntimeFile::matching(const string name, string passwd) const
         return NO_USER;
 }
 
-bool RuntimeFile::modifyComm()
-{
-
-}
-
-bool RuntimeFile::modifyOrder()
-{
-
-}
-
-void RuntimeFile::modifyUserBal(string name, double newBalance)
-{
-    for(int i = 0; i < usersSize; ++i)
-    {
-        if(equal(name, usersFile[i].name))
-        {
-            usersFile[i].balance = newBalance;
-            writeUsersFile("w");
-            break;
-        }
-    }
-}
-
-void RuntimeFile::modifyUserInfo(int flag, string userName, string newInfo)
-{
-    int i = 0;
-     for(; i < usersSize; ++i)
-    {
-        if(equal(userName,usersFile[i].name))
-            break;
-    }
-    /*修改用户名*/
-    if(1 == flag)
-        assignment(newInfo,usersFile[i].name);                
-    /*修改联系方式*/
-    else if(2 == flag)
-        assignment(newInfo,usersFile[i].phone);       
-    /*修改地址*/
-    else if(3 == flag)
-        assignment(newInfo,usersFile[i].address);       
-
-    writeUsersFile("w");
-}
-
-void RuntimeFile::modifyUserState()
-{
-    
-}
-
-
-
+/*数据结构设计得很有问题！一旦用new重新分配空间，那么会影响到
+用户对象中数据成员， 需要改动很大，懒得改了*/
 void RuntimeFile::overflowProcess()
 {
-    
+    if(usersSize == maxUserSize)
+    {
+        
+    }
+    else if(commSize == size)
+    {
+
+    }
+    else if(orderSize == size)
+    {
+
+    }
 }
 
 /*用户文件结构：userID userName passewd phone address balance userState*/
@@ -309,7 +305,11 @@ void RuntimeFile::showSpecificComms(string name, int flag) const
 
 void RuntimeFile::showOrders() const
 {
-
+    cout << starStr << endl;
+    PRINT_ORDER_ATTRS_NAME;
+    for(int i = 0; i < orderSize; ++i)
+        PRINT_ORDER_ATTRS_VALUE;
+    cout << starStr << endl;
 }
 
 void RuntimeFile::showUsers() const
