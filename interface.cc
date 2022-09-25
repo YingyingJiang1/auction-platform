@@ -1,4 +1,5 @@
-#include "interface.h"
+#include "logAndSign.h"
+#include "menuNumber.h"
 void exitRun()
 {
     char ch;
@@ -11,27 +12,33 @@ void exitRun()
     }
     exit(1);
 }
+void prompt();
+void promptAdm();
+void promptUser();
+void promptSeller();
+void promptBuyer();
+void promptPersonalInfo();
 void enterAdmIntf(Administrator *);
 void enterUserIntf(User *);
-extern string starStr;
-
-void mainIntf(RuntimeFile *file)
+void checkAuctionExpired();
+extern  char  starStr[];
+static char str[120] = "===================================================================================="
+"===============================";
+void mainIntf()
 {
-    cout << starStr << endl;
-    cout << "请注意不要在您输入的操作编号中添加任何无关字符，包括空格！" << endl;
-    cout << starStr << endl;
     int seq;
     Administrator *adm;
     User *user;
     while (1)
     {
+        file.checkCommExpired();
         prompt();
         cin >> seq;
         char ch = getc(stdin);
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            exitRun();
+            //exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl << endl;
             cin.clear();
             cin.ignore(HUGE_NUM, '\n');
@@ -67,13 +74,14 @@ void enterAdmIntf(Administrator *adm)
     int seq;
     while (1)
     {
+        file.checkCommExpired();
         promptAdm();
         cin >> seq;
         char ch = getc(stdin);
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            exitRun();
+            //exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl<< endl;
             cin.clear();
             cin.ignore(HUGE_NUM, '\n');
@@ -114,13 +122,14 @@ void enterBuyerIntf(User *user)
     int seq;
     while (1)
     {
+        file.checkCommExpired();
         promptBuyer();
         cin >> seq;
         char ch = getc(stdin);
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            exitRun();
+            //exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
             cin.clear();
@@ -131,10 +140,10 @@ void enterBuyerIntf(User *user)
         switch (seq)
         {
         case BUYER_VIEW_COMM_LIST:
-            user->viewReleasedComm();
+            user->viewAllComms();
             break;
-        case BUYER_BUY_COMM:
-            user->buy();
+        case BUYER_AUCTION_COMM:
+            user->auction();
             break;
         case BUYER_SEARCH_COMM:
             user->searchCommodity();
@@ -144,6 +153,12 @@ void enterBuyerIntf(User *user)
             break;
         case BUYER_VIEW_COMM_DETAIL:
             user->viewCommDetail();
+            break;
+        case BUYER_MODIFY_AUCTION:
+            user->modifyAuction();
+            break;
+        case BUYER_AUCTION_INFO:
+            user->viewAllAuctions();
             break;
         case BUYER_BACK_TO_USER_INTF:
             return;
@@ -155,17 +170,18 @@ void enterBuyerIntf(User *user)
 }
 
 void enterSellerIntf(User *user)
-{
+{    
     int seq;
     while (1)
     {
+        file.checkCommExpired();
         promptSeller();
         cin >> seq;
         char ch = getc(stdin);
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            exitRun();
+            //exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl<< endl;
             cin.clear();
             cin.ignore(HUGE_NUM, '\n');
@@ -189,6 +205,8 @@ void enterSellerIntf(User *user)
         case SELLER_VIEW_ORDERS:
             user->viewSellerOrders();
             break;
+        case SELLER_PUTAWAY_COMM:
+            user->putawayComm();
         case SELLER_BACK_TO_USER_INTF:
             return;
         default:
@@ -202,13 +220,14 @@ void enterInfoManageIntf(User *user)
     int seq;
     while (1)
     {
+        file.checkCommExpired();
         promptPersonalInfo();
         cin >> seq;
         char ch = getc(stdin);
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-        exitRun();
+        //exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
             cin.clear();
@@ -242,13 +261,14 @@ void enterUserIntf(User *user)
     int seq;
     while (1)
     {
+        file.checkCommExpired();
         promptUser();
         cin >> seq;
         char ch = getc(stdin);
         ungetc(ch, stdin);
         if (cin.fail() || ch != '\n')
         {
-            exitRun();
+            //exitRun();
             cout << "输入不合法，请输入正确的操作编号！" << endl
                  << endl;
             cin.clear();
@@ -276,5 +296,56 @@ void enterUserIntf(User *user)
                  << endl;
         }
     }
+}
+
+void prompt()
+{
+    cout << str << endl;
+    cout << "                  1.管理员登陆    2.用户注册  3.用户登陆  4.退出程序"<< endl;
+    cout << str << endl;
+    cout <<  "请输入要进行的操作的编号:  ";
+}
+
+void promptAdm()
+{
+    cout << str << endl;
+    cout << "1.查看所有商品 2.搜索商品 3.下架商品 4.查看所有订单 5.查看所有用户 6.封禁用户 7.注销";
+    cout << endl;
+    cout << str << endl;
+    cout << "请输入要进行的操作的编号：";
+}
+
+void promptUser()
+{
+    cout << str << endl;
+    cout << "       1.我是买家     2. 我是卖家     3.个人信息管理      4.注销登陆" << endl;
+    cout << str << endl;
+    cout << "请输入要进行的操作的编号：" ;
+}
+
+void promptSeller()
+{
+    cout << str <<endl;
+    cout << "1.发布商品 2.查看发布商品 3.修改商品信息 4.下架商品 5.查看历史订单 6.返回用户主界面";
+    cout << endl;
+    cout << str << endl;
+    cout << "请输入要进行的操作的编号：";
+}
+
+void promptBuyer()
+{
+    cout << str <<endl;
+    cout << "1.查看商品列表 2.竞拍商品 3.搜索商品 4.查看历史订单 5.查看商品详细信息 6.修改竞拍 7.查看竞拍信息 8.返回用户主界面";
+    cout << endl;
+    cout << str <<endl;
+    cout << "请输入要进行的操作的编号：";
+}
+
+void promptPersonalInfo()
+{
+    cout << str << endl;
+    cout << "       1.查看信息      2.修改信息      3.充值      4.返回用户主界面" << endl;
+    cout << str << endl;
+    cout << "请输入要进行的操作的编号：";
 }
 

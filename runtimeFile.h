@@ -1,55 +1,89 @@
 #ifndef RUNTIME_FILE
 #define RUNTIME_FILE
-#include<string>
 using namespace std;
 #include"type.h"
-#include"fileEntry.h"
-#include"strCompare.h"
-#include"macro.h"
+#include"strOperation.h"
+#include"promptMacro.h"
 #include<iostream>
+#define HUGE_NUM 0X7FFFFFFF
 
-
+enum LogFlag{NO_USER= 1, WRONG_PASSWD,LOGIN_SUCCEED, BANNED};
+extern char starStr[];
 
 class RuntimeFile
 {
-	friend class Administrator;
-	friend class User;
+	friend bool myGreater(const char* str1, const char* str2);
 private:
-    UserEntry* usersFile;
-    CommodityEntry* commoditiesFile;
+    UserEntry* usersFile;    
     OrderEntry* ordersFile;
+	/*商品列表用链表表示*/
+	CommodityEntry* onAuctionComms;
+	CommodityEntry* removedComms;
+	AuctionList* auctionList;
+	/*存储上一次搜索到的位置,对于连续搜索同一个商品ID的情况
+	只需要遍历链表一次就可以实现*/
+	CommodityEntry* previous;
 	int usersSize;
-	int commSize;
 	int orderSize;
+	int commAmount;
 	/*动态数组的大小*/
 	int size;
-	int maxUserSize;
+	int maxUserSize;	
+	void assignCurDate(char* date);
+	void assignID(char, char*, int);
+	bool checkDateExpired(const char* startDate);
+	void endAuction(const AuctionList* ptr);
+	void findCommID(const char* commID, CommodityEntry* commList);
+	template<typename T>
+	void freeList(T* head);
+	int getIndex(const char* id) const;		
+	void overflowProcess();	
+	void readToAucList();
     void readToUsers();
 	void readToComms();
 	void readToOrders();	
-	void overflowProcess();
-	void assignCurDate(char*);
-	void assignID(char, char*, int);
-	int getIndex(string id) const;
+	AuctionInfo* sortList(AuctionInfo* head,AuctionInfo* ptrInfo);
+	void writeUsersFile(const char*);
+	void writeCommsFile(const char*);
+	void writeOrdersFile(const char*);
+	void writeAuctionFile(const char* mode);
 public:
     RuntimeFile(int defaultSize = 200000);
     ~RuntimeFile();		
 	RuntimeFile operator = (RuntimeFile rFile);
 	RuntimeFile(const RuntimeFile&);
-	CommodityEntry* addCommodity( string &, double, int, string &, char*);
-	OrderEntry* addOrder(int , int, char*);
-	void addUser(const string name, const string passwd);
-    LogFlag matching(const string name, const string ) const;
-	bool find(const string ) const;
-	void showUsers()const;
-	void showCommodities()const;
-	void showCommDetail(string )const;
-	void showSpecificComms(string name, int flag) const;
-	void showOrders()const;
-	void writeUsersFile(const char*)const;
-	void writeCommsFile(const char*)const;
-	void writeOrdersFile(const char*)const;
+	void addCommodity( const char* seller , const char* name, 
+	double price, int amount, const char*description);
+	OrderEntry* addOrder(const char* commID, const char* buyerID, const char* sellerID,
+	int amount, double unitPrice);
+	void addUser(const char* name, const char* passwd);
+	bool addAuctionInfo(const char* commID, const char* buyer, double unitPrice, int amount);
+	bool beAuctioned(const char* commID);
+	void checkAuctionList();
+	void checkCommExpired();
+	int commLeft(const char* commID);
+    LogFlag matching(const char* name, const char* passwd) const;
+	bool find(const char* name ) const;
+	void getID(const char*userName, char*userID)const;
+	void modifyAuctionInfo(const char* bidder, const char* commID,int option);
+	void modifyCommPrice(const char* commID , double newPrice);
+	void modifyCommDesc(const char* commID, const char* newDescription);
+	void modifyCommState(const char*commID, int newState);
+	void modifyUserAttr(const char* userID, const char* newInfo, int option);
+	int modifyUserBal(const char* userID, double money);
+	void modifyUserState(const char* userID);
+	bool findComm(char* seller, const char* commID, int identity) ;
+	bool findUser(const char* userID) const;
+	AuctionInfo* findUserInAucLsit(const char* bidder, const char* commID);
+	void showAllUsers()const;
+	void showAllComms(int identity)const;
+	void showAuctions(char* bidder) const;
+	void showSellerComms(const char* sellerID);
+	void showCommDetail(const char* commID);
+	void showSpecificComms(char* name, int identity)const ;
+	void showAllOrders()const;
+	void showOrders(const char* userID, int identity)const;
+	void showUserInfo(const char* userID) const;	
 };
-
 
 #endif

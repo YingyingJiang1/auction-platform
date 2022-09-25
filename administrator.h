@@ -3,7 +3,7 @@
 #include"runtimeFile.h"
 
 extern RuntimeFile file;
-extern string starStr;
+extern  char starStr[];
 class Administrator
 {
 public:

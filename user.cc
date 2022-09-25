@@ -1,136 +1,114 @@
 #include"user.h"
-extern std::string starStr;
-bool checkAlnum(std::string,int);
+
 #define PRINT_COMM_ATTRS_VALUE \
-printf("%-6s    %-20s   %-10lf   %-10s     %-10d   %-10s     %-10d\n",\
+printf("%-6s    %-20s   %-10lf   %-20s     %-10d   %-10s     %-10d\n",\
             releasedComms[i]->id, releasedComms[i]->name, releasedComms[i]->price, releasedComms[i]->addedDate,\
             releasedComms[i]->number, releasedComms[i]->sellerID, releasedComms[i]->state)
 
-User::User(const std::string name,int defaultSize )
+User::User(const char* nameInputed)
 {
-    size = defaultSize;
-
-    /*set "userInfo" point to the user's info in the runtime file*/
-    for(int i = 0; i < file.usersSize; ++i)
-        if(equal(name, file.usersFile[i].name))
-        {
-            userInfo = &file.usersFile[i];
-            break;
-        }
-
-    /*set a pointer for each commodity the user released and
-    assign the address of each released commodity to each pointer*/
-    commSize = 0;
-    releasedComms = new CommodityEntry*[size];
-    for(int i = 0; i < file.commSize; ++i)
-    {
-        if(equal(userInfo->id, file.commoditiesFile[i].sellerID))
-            releasedComms[commSize++] = &file.commoditiesFile[i];
-    }
-
-    buySize = 0;
-    sellSize = 0;
-    buyOrder = new OrderEntry*[size];
-    sellOrder = new OrderEntry*[size];
-    for(int i =0; i < file.orderSize; ++i)
-    {
-        if(equal(userInfo->id, file.ordersFile[i].buyerID))
-            buyOrder[buySize++] = &file.ordersFile[i];
-        else if(equal(userInfo->id, file.ordersFile[i].sellerID))
-            sellOrder[sellSize++] = &file.ordersFile[i];
-    }
+    char ret[MAX_ID_SIZE+1];
+    file.getID(nameInputed, ret);
+    assignment(nameInputed,name);
+    assignment(ret, userID);
 }
 
 void User::auction()
 {
-
+   char commID[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
+   std::cout << "请输入你要竞拍的商品的ID：" ;
+   fgets(commID, MAX_ID_SIZE+1, stdin);
+   if(checkID('M', commID))
+   {
+       bool found = file.findComm(seller, commID, USER);
+       if(found)
+       {
+           if(equal(seller, userID))
+           {
+               std::cout << "您不能参与自己发布的商品的竞拍！" << std::endl << std::endl;
+               return;
+           }
+           if(file.findUserInAucLsit(userID, commID))
+           {
+               std::cout << "您已参与了该商品的竞拍，请不要重复参与！" << std::endl << std::endl;
+               return;
+           }
+           double unitPrice;
+           int amount;
+           std::cout << "请输入竞拍单价：";
+           std::cin >> unitPrice;
+           if(!checkNum())
+           {
+               PROMPT_AUCTION_FAILURE("竞拍单价输入不合法");
+               return;
+           }
+           std::cout << "请输入竞拍数量：";
+           std::cin >> amount;
+           if(!checkNum())
+           {
+               PROMPT_AUCTION_FAILURE("商品数量不合法");
+               return;
+           }
+           /*输入全部合法，可以参与竞拍的情况*/
+           char  buyer[MAX_ID_SIZE+1];
+           assignment(userID, buyer);
+            std::cout << starStr << std::endl;
+           if(file.addAuctionInfo(commID, buyer, unitPrice, amount))
+           {
+                std::cout << "成功参与竞拍，该商品竞拍结束后才能知道竞拍结果，"
+            "在此期间您可以随时修改您的竞拍单价和数量或取消竞拍，\n"
+            "但相应的您的竞拍时间也会被修改！" << std::endl << std::endl;
+           }           
+           std::cout << starStr << std::endl;
+       }
+       else
+            std::cout << "未找到ID为 " << commID << " 的在售商品，参与竞拍失败！" 
+            << std::endl << std::endl;
+   }
+   else
+        std::cout << "商品ID输入不合法，参与竞拍失败！" << std::endl << std::endl;
 }
 
-void User::buy()
+void User::modifyAuction()
 {
-    string id;
-    std::cout << "请输入商品ID：";
-    getline(cin, id);
-    if(checkID('M', id))
+    char commID[MAX_COMM_NAME_SIZE+1];
+    std::cout << "请输入您要修改的竞拍信息的商品ID：";
+    fgets(commID, MAX_COMM_NAME_SIZE+1, stdin);
+    if(checkID('M', commID))
     {
-        int num;
-        std::cin >> num;
+        int seq;
+        std::cout << "请输入要进行的操作(1.修改竞拍单价 2.修改竞拍数量 3.取消竞拍）";
+        std::cin >> seq;
         if(checkNum())
-        {
-            int i = file.getIndex(id);
-            if(i == file.commSize || file.commoditiesFile[i].state == REMOVED)
-                std::cout << "没有找到该ID的商品！" << std::endl << std::endl;
-            else
-            {
-                int left = file.commoditiesFile[i].number;
-                if(num <= left)
-                {
-                    if(userInfo->balance >= file.commoditiesFile[i].price * left)
-                    {
-                        int sum = file.commoditiesFile[i].price * left;
-                        int j = file.getIndex(file.commoditiesFile[i].sellerID);
-                        userInfo->balance -= sum;                        
-                        file.commoditiesFile[i].number -= num;                        
-                        file.usersFile[j].balance += sum;
-                        buyOrder[buySize++] = file.addOrder(i, num, userInfo->id);
-                        file.writeCommsFile("w");
-                        file.writeUsersFile("w");
-                        cout << starStr << endl;
-                        cout << "交易提醒！" << endl;
-                        cout << "交易时间：" << buyOrder[buySize-1]->date << endl;
-                        cout << "交易单价：" << buyOrder[buySize-1]->unitPrice << endl;
-                        cout << "交易数量：" << num << endl;
-                        cout << "交易状态：交易成功" << endl; 
-                        cout << "您的余额：" << userInfo->balance << endl;
-                        cout << starStr << endl;
-                    }
-                    else
-                        cout << "余额不足，请充值！" << endl << endl;
-                }
-                else
-                    std::cout << "该商品剩余数量为 " << file.commoditiesFile[i].number << " ，购买失败！" << std::endl << std::endl;
-            }                            
-        }      
+            /*此处仅能确保seq是整数*/
+            file.modifyAuctionInfo(userID, commID, seq);
         else
-            std::cout << "商品数量输入不合法！" << std::endl << std::endl; 
+            PROMPT_OPERATION_NUMBER_ERROR;
     }
     else
-        std::cout << "商品ID输入不合法！" << std::endl << std::endl;
+        PROMPT_MODIFICATION_FAILURE("商品输入不合法");
 }
-
-int User::getCommIndex(string &id) const
-	{
-		int i = 0;
-		for(; i < commSize; ++i)
-        {
-            if(equal(id, releasedComms[i]->id))
-                break;
-        }
-		return i;
-	}
 
 void User::modifyCommInfo() const
 {
     int seq;
-    string id;    
+    char id[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
     std::cout << "请输入要修改的商品的ID：";
-    std::getline(std::cin, id);
+    fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
     {
-        int i = getCommIndex(id);
-        
-        if(i == commSize)
+        bool found = file.findComm(seller, id, USER);        
+        if(!found || !equal(seller, userID))
         {
             PROMPT_MODIFICATION_FAILURE("未在您发布的商品中找到该ID的商品");
             return;
         }
         std::cout << "请输入要修改的商品的属性(1.价格 2.描述）：";
         std::cin >> seq;
-        if(!checkNum)
+        if(!checkNum())
             PROMPT_OPERATION_NUMBER_ERROR;
         else
         {
-            std::cin.ignore(HUGE_NUM, '\n');
             /*修改商品价格*/
             if(seq == 1)
             {
@@ -139,8 +117,7 @@ void User::modifyCommInfo() const
                 std::cin >> price;
                 if(checkNum())
                 {
-                    releasedComms[i]->price = price;
-                    file.writeCommsFile("w");
+                    file.modifyCommPrice(id, price);
                     PROMPT_MODIFICATION_SUCCEEED;
                 }
                 else
@@ -149,13 +126,12 @@ void User::modifyCommInfo() const
             /*修改商品描述*/
             else if(seq == 2)
             {
-                string description;
+                char description[MAX_COMM_DESCRIPTION_SIZE+1];
                 std::cout << "请输入新的描述：";
-                std::getline(std::cin ,description);
-                if(checkAlnum(description, MAX_COMM_DESCRIPTION_SIZE))
+                fgets(description, MAX_COMM_DESCRIPTION_SIZE+1, stdin);
+                if(checkStr(description, MAX_COMM_DESCRIPTION_SIZE))
                 {
-                    assignment(description, releasedComms[i]->description);
-                    file.writeCommsFile("w");
+                    file.modifyCommDesc( id, description);
                     PROMPT_MODIFICATION_SUCCEEED;
                 }
                 else
@@ -172,34 +148,33 @@ void User::modifyCommInfo() const
 
 void User::pullCommodity()
 {
-    string id;
+    char commID[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
+    assignment(userID, seller);
     std::cout << "请输入要下架的商品的ID：";
-    std::getline(std::cin ,id);
-    if(checkID('M', id))
+    fgets(commID, MAX_ID_SIZE+1, stdin);
+    if(checkID('M', commID))
     {
-        int i = 0; 
-        for(; i < commSize; ++i)
-            if(equal(id, releasedComms[i]->id))
-                break;
-        if(i == commSize)
+        bool found = file.findComm(seller, commID, USER);
+        if(!found || !equal(seller, userID))
         {
-            PROMPT_MODIFICATION_FAILURE("未在您发布的商品中找到该ID的商品");
+            PROMPT_PULL_FAILURE("未在您发布的商品中找到该ID的商品");
             return;
         }
-
+        if(file.beAuctioned(commID))
+        {
+            PROMPT_PULL_FAILURE("该商品已有用户拍下");
+            return;
+        }
         std::cout << "确认要下架该商品吗？" << std::endl;
-        std::cout << starStr << std::endl;
-        PRINT_COMM_ATTRS_NAME;
-        PRINT_COMM_ATTRS_VALUE;        
-        std::cout << starStr << std::endl;  
+        file.showCommDetail(commID);        
 
         std::cout << "请选择(y/n):";
         char confirm;
         std::cin >> confirm;
+        cin.ignore(HUGE_NUM, '\n');
         if(tolower(confirm) == 'y')
         {
-            releasedComms[i]->state = REMOVED;
-            file.writeCommsFile("w");
+            file.modifyCommState(commID, REMOVED);
             std::cout << "下架成功！" << std::endl << std::endl;
         }
         else
@@ -207,10 +182,23 @@ void User::pullCommodity()
     }
     /*商品ID不是"M+三位数字"的形式*/
     else
-        PROMPT_MODIFICATION_FAILURE("商品ID输入不合法");
+        PROMPT_PULL_FAILURE("商品ID输入不合法");
 }
 
+void User::putawayComm() const
+{
+    PRINT_STAR_STRING;
+    std::cout << "请输入您要重新上架的商品的ID：" ;
+    char commID[MAX_COMM_NAME_SIZE+1];
+    fgets(commID, MAX_COMM_NAME_SIZE+1, stdin);
+    if(checkStr(commID, MAX_COMM_NAME_SIZE+1))
+    {
 
+    }
+    else    
+        std::cout << "商品输入不合法，重新上架失败！" << std::endl;
+    PRINT_STAR_STRING;
+}
 
 void User::modifyUserInfo()
 {
@@ -221,7 +209,8 @@ void User::modifyUserInfo()
         PROMPT_OPERATION_NUMBER_ERROR;
     else
     {
-        std::cin.ignore(HUGE_NUM,'\n');
+        char id[MAX_ID_SIZE+1];
+        assignment(userID, id);      
         switch (seq)
         {
             case 1:
@@ -230,16 +219,15 @@ void User::modifyUserInfo()
                 std::cout << "请注意用户名只能由英文字母和数字构成且不能超过10个字符" << std::endl;
                 std::cout << starStr << std::endl;
                 std::cout << "请输入修改后的用户名：" ;
-                std::string newName;
-                std::getline(std::cin, newName);
+                char newName[MAX_NAME_SIZE+1];
+                fgets(newName, MAX_NAME_SIZE+1, stdin);
                 if(checkAlnum(newName,MAX_NAME_SIZE))
                 {
                     if(file.find(newName))
                         PROMPT_MODIFICATION_FAILURE("用户名已存在");
                     else
-                    {
-                        assignment(newName, userInfo->name);
-                        file.writeUsersFile("w");
+                    {                                          
+                        file.modifyUserAttr(id, newName, 1);
                         PROMPT_MODIFICATION_SUCCEEED;
                     }                   
                 }
@@ -250,12 +238,11 @@ void User::modifyUserInfo()
             case 2:
             {
                 std::cout << "请输入修改后的联系方式：" ;
-                std::string newPhone;
-                std::getline(std::cin, newPhone);
+                char newPhone[MAX_PHONENUMBER_SIZE+1];
+                fgets(newPhone, MAX_PHONENUMBER_SIZE+1, stdin);
                 if(checkDigits(newPhone,MAX_PHONENUMBER_SIZE))
                 {
-                    assignment(newPhone, userInfo->phone);
-                    file.writeUsersFile("w");
+                    file.modifyUserAttr(id, newPhone, 2);
                     PROMPT_MODIFICATION_SUCCEEED;            
                 }
                 else
@@ -268,16 +255,16 @@ void User::modifyUserInfo()
                 std::cout << "请不要在您的地址中包含“,” " << std::endl;
                 std::cout << starStr << std::endl;
                 std::cout << "请输入修改后的地址：" ;
-                std::string newAddress;
-                std::getline(std::cin, newAddress);
+                char newAddress[MAX_ADDRESS_SIZE+1];
+                fgets(newAddress, MAX_ADDRESS_SIZE+1, stdin);
                 if(checkStr(newAddress,MAX_ADDRESS_SIZE))
                 {
-                    assignment(newAddress, userInfo->address);
-                    file.writeUsersFile("w");
+                    file.modifyUserAttr(id, newAddress, 3);
                     PROMPT_MODIFICATION_SUCCEEED;                          
                 }
                 else
                     PROMPT_MODIFICATION_FAILURE("地址不合法");
+                break;;
             }
             default:
                 PROMPT_OPERATION_NUMBER_ERROR;          
@@ -285,54 +272,41 @@ void User::modifyUserInfo()
     }
 }
 
-void User::overflowProcess()
-{
-
-}
-
 void User::releaseCommodity() 
 {
-    std::string commName, description;
+    char commName[MAX_COMM_NAME_SIZE+1], description[MAX_COMM_DESCRIPTION_SIZE+1];
     double price;
     int amount;
 
-    std::cout << "请输入商品名称：";
-    std::getline(std::cin, commName);
+    std::cout << "请输入商品名称(不要超过20个字符）：";
+    fgets(commName, MAX_COMM_NAME_SIZE+1, stdin);
     if(!checkStr(commName,MAX_COMM_NAME_SIZE))
     {
-        PROMPT_MODIFICATION_FAILURE("用户名已存在");
+        PROMPT_RELEASE_FAILURE("商品名称不合法，可能包含 ‘,' 号");
         return;
     }
 
     std::cout << "请输入商品价格：";
     std::cin >> price;
-    char ch = getc(stdin);
-    ungetc(ch, stdin);
-    if(std::cin.fail() || ch != '\n')
+    if(!checkNum())
     {
-        std::cin.clear();
-        std::cin.ignore(HUGE_NUM,'\n');
-        std::cout << "商品价格输入不合法，发布失败！" << std::endl << std::endl;
+        PROMPT_RELEASE_FAILURE("商品价格输入不合法");
         return;
     }
-
+    
     std::cout << "请输入商品数量：";
     std::cin >> amount;
-    ch = getc(stdin);
-    //ungetc(ch,stdin);
-    if(std::cin.fail() || ch != '\n')
+    if(!checkNum())
     {
-        std::cin.clear();
-        std::cin.ignore(HUGE_NUM,'\n');
-        std::cout << "商品数量输入不合法，发布失败！" << std::endl << std::endl;
+        PROMPT_RELEASE_FAILURE("商品数量输入不合法");
         return;
     }
 
     std::cout << "请输入商品描述：";
-    std::getline(std::cin, description);
+    fgets(description, MAX_COMM_DESCRIPTION_SIZE+1, stdin);
     if(!checkStr(description,MAX_COMM_DESCRIPTION_SIZE))
     {
-        std::cout << "商品描述输入不合法，发布失败！" << std::endl << std::endl;
+        PROMPT_RELEASE_FAILURE("商品描述输入不合法");
         return;
     }
 
@@ -351,10 +325,9 @@ void User::releaseCommodity()
     std::cin.ignore(HUGE_NUM,'\n');
     if(tolower(confirm) == 'y')
     {
-        if(commSize == size)
-            overflowProcess();
-        releasedComms[commSize] =  file.addCommodity(commName, price, amount, description, userInfo->id);
-        ++commSize;
+        char seller[MAX_ID_SIZE+1];
+        assignment(userID, seller);
+        file.addCommodity(seller, commName, price, amount, description);
         std::cout << "商品发布成功！" << std::endl << std::endl;
     }
     else
@@ -365,84 +338,88 @@ void User::releaseCommodity()
 
 void User::searchCommodity() const
 {
-    string name;
-    std::getline(std::cin , name);
+    char commName[MAX_COMM_NAME_SIZE+1];
     std::cout << "请输入商品名称：" ;
-    file.showSpecificComms(name, 0);    
+    fgets(commName, MAX_COMM_NAME_SIZE+1, stdin);
+    /*因为商品名都不包含‘,'，所以当输入商品名包含','时无需查找*/
+    if(!checkStr(commName, MAX_COMM_NAME_SIZE))
+        std::cout << "没有找到您想要的商品，返回用户主界面！" << std::endl << std::endl;
+    else
+        file.showSpecificComms(commName, USER);    
 }
 
 void User::topUp()
 {
-    std::cout << starStr << std::endl;
-    std::cout << "请不要在您输入金额的中间或者结尾加入任何无关字符，包括空格！" << std::endl;
-    std::cout << starStr << std::endl;
-
     double money;
-    std::cout << "请输入要充值的金额：" ;
+    std::cout << "请输入要充值的金额(请不要在金额的中间或者结尾加入空格)：" ;
     std::cin >> money;
-    /*在调用完getc取出回车符后要立即将字符放回，否则程序会等待输入回车符*/
-    char ch = getc(stdin);
-    ungetc(ch, stdin);
-    if(std::cin.fail() || money <= 0 || ch != '\n')
-    {
-        std::cin.clear();
-        std::cin.ignore(HUGE_NUM, '\n');
+    if(!checkNum() || money <= 0)
         std::cout << "输入不合法，充值失败！" << std::endl << std::endl;
-    }
     else
     {
-        std::cin.ignore(HUGE_NUM, '\n');
-        userInfo->balance += money;
-        file.writeUsersFile("w");
-        std::cout << "充值成功，当前余额：" << userInfo->balance <<  std::endl << std::endl;
+        char id[MAX_ID_SIZE+1];
+        assignment(userID, id);
+        int curBalance = file.modifyUserBal(id, money);
+        std::cout << "充值成功，当前余额：" <<curBalance <<  std::endl << std::endl;
     }
+}
+
+void User::viewAllAuctions() 
+{
+    file.showAuctions(userID);
+}
+
+/*买家查看在拍商品列表*/
+void User::viewAllComms() const
+{
+    file.showAllComms(USER);
 }
 
 void User::viewUserInfo() const
 {
-    std::cout << starStr << std::endl;
-    std::cout << "用户名：" << userInfo->name << std::endl;
-    std::cout << "联系方式：" <<userInfo-> phone << std::endl;
-    std::cout << "地址：" <<userInfo-> address << std::endl;
-    std::cout << "钱包余额：" << userInfo->balance << std::endl;
-    std::cout << starStr << std::endl;
+    char id[MAX_ID_SIZE+1];
+    assignment(userID, id);
+    file.showUserInfo(id);    
 }	
 
+/*买家查看在拍商品的详细信息*/
 void User::viewCommDetail() const
 {
-    string id;
+    char id[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
     std::cout << "请输入您想要查看的商品的ID：";
-    std::getline(std::cin, id);
+    fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
-        file.showCommDetail(id);
+    {
+        bool found = file.findComm(seller, id, USER);
+        if(found)
+            file.showCommDetail(id);    
+        else
+            std::cout << "未在正在拍卖的商品中找到ID为 " << id << " 的商品!" << std:: endl << std::endl;
+    }
     else
         std::cout << "商品ID输入不合法！" << std::endl << std::endl;
 }
 
 void User::viewBuyerOrders() const
 {
-    cout << starStr << endl;
-    PRINT_BUYER_ORDER_ATTRS_NAME;
-    for(int i = 0; i < buySize; ++i)
-        PRINT_BUYER_ORDER_ATTRS_VALUE;
-    cout << starStr << endl;
+    char id[MAX_ID_SIZE+1];
+    assignment(userID, id);
+    file.showOrders(id, BUYER);
+
 }
 
 void User::viewSellerOrders() const 
 {
-    cout << starStr << endl;
-    PRINT_SELLER_ORDER_ATTRS_NAME;
-    for(int i = 0; i < sellSize; ++i)
-        PRINT_SELLER_ORDER_ATTRS_VALUE;
-    cout << starStr << endl;
+    char id[MAX_ID_SIZE+1];
+    assignment(userID, id);
+    file.showOrders(id, SELLER);
 }
 
+/*卖家查看已发布商品*/
 void User::viewReleasedComm() const
 {
-    std::cout << starStr << std::endl;
-    PRINT_COMM_ATTRS_NAME;    
-    for(int i = 0; i < commSize; ++i)
-        PRINT_COMM_ATTRS_VALUE;
-    std::cout << starStr << std::endl;
+    char id[MAX_ID_SIZE+1];
+    assignment(userID, id);
+    file.showSellerComms(userID);
 }
 

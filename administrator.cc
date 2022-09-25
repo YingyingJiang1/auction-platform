@@ -11,41 +11,35 @@ printf("%-6s    %-20s   %-10lf   %-10s     %-10d   %-10s     %-10d\n",\
 
 void Administrator::viewUsers() const
 {
-    file.showUsers();
+    file.showAllUsers();
 }
 	
 void Administrator::banUser() const
 {
-    string userID;
+    char userID[MAX_ID_SIZE+1];
     std::cout << "请输入要封禁的用户的ID：" ;
-    getline(cin,userID);
-   if(checkID('U', userID))
+    fgets(userID, MAX_ID_SIZE+1, stdin);
+    if(checkID('U', userID))
    {
-        for(int i = 0; i < file.usersSize; ++i)
-        {
-            if(equal(userID, file.usersFile[i].id))
-            {
-                std::cout << "是否确认封禁该用户?" << endl;
-                std::cout << starStr << endl;
-                PRINT_USER_ATTRS_NAME;
-                PRINT_USER_ATTRS_VALUE;                                
-                std::cout << starStr << endl;
+       bool found = file.findUser(userID);
+       if(found)
+       {
+           std::cout << "是否确认封禁该用户?" << endl;
+           file.showUserInfo(userID);
 
-                std::cout << "请输入(y/n): ";
-                char ch;
-                cin >> ch;
-                if(tolower(ch) == 'y')
-                {
-                    file.usersFile[i].state = INACTIVE;
-                    file.writeUsersFile("w");
-                    std::cout << "封禁成功！" << endl << endl;
-                }
-                else
-                    std::cout << "封禁失败！" << endl << endl;
-                return;
+           std::cout << "请输入(y/n): ";
+            char confirm;
+            cin >> confirm;
+            if(tolower(confirm) == 'y')
+            {
+                file.modifyUserState(userID);
+                std::cout << "封禁成功！" << endl << endl;
             }
-        }
-        std::cout << "用户ID不存在，封禁失败！" << endl <<endl;
+            else
+                std::cout << "封禁失败！" << endl << endl;
+       }                                        
+        else
+            std::cout << "用户ID不存在，封禁失败！" << endl <<endl;
    }
     else
         std::cout << "用户ID输入不合法，封禁失败！" << endl << endl;
@@ -53,30 +47,31 @@ void Administrator::banUser() const
 
 void Administrator::pullCommodity() const
 {
-    string id;
+    char id[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
     cout << "请输入要下架的商品的ID：";
-    std::getline(cin ,id);
+    fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
     {
-        int i = file.getIndex(id);         
-        if(i == file.commSize)
+        bool found = file.findComm(seller, id, ADMIN);
+        if(!found)
         {
             PROMPT_MODIFICATION_FAILURE("未找到该ID的商品");
             return;
         }
+        if(file.beAuctioned(id))
+        {
+            PROMPT_PULL_FAILURE("该商品已有用户拍下");
+            return;
+        }            
         std::cout << "确认要下架该商品吗？" << std::endl;
-        std::cout << starStr << std::endl;
-        PRINT_COMM_ATTRS_NAME;
-        PRINT_COMM_ATTRS_VALUE;        
-        std::cout << starStr << std::endl;  
+        file.showCommDetail(id);
 
         std::cout << "请选择(y/n):";
         char confirm;
         std::cin >> confirm;
         if(tolower(confirm) == 'y')
         {
-            file.commoditiesFile[i].state = REMOVED;
-            file.writeCommsFile("w");
+            file.modifyCommState(id, REMOVED);
             std::cout << "下架成功！" << std::endl << std::endl;
         }
         else
@@ -89,19 +84,22 @@ void Administrator::pullCommodity() const
 
 void Administrator::searchCommodities() const
 {
-    string name;
-    getline(cin , name);
+    char commName[MAX_COMM_NAME_SIZE+1];
     std::cout << "请输入商品名称：" ;
-    file.showSpecificComms(name, 1);    
+    fgets(commName, MAX_COMM_NAME_SIZE+1, stdin);
+    /*因为商品名都不包含‘,'，所以当输入商品名包含','时无需查找*/
+    if(!checkStr(commName, MAX_COMM_NAME_SIZE))
+        std::cout << "没有找到您想要的商品，返回管理员主界面！" << std::endl << std::endl;
+    file.showSpecificComms(commName, ADMIN);    
 }
 
 void Administrator::viewCommodities() const
 {
-    file.showCommodities();
+    file.showAllComms(ADMIN);
 }
 
 void Administrator::viewOrders() const
 {
-    file.showOrders();
+    file.showAllOrders();
 }
 
