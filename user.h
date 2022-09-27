@@ -16,6 +16,7 @@ public:
 	void modifyCommInfo()const;	
 	void modifyUserInfo();
 	void pullCommodity();
+	void putawayComm()const;
 	void releaseCommodity();
 	void searchCommodity()const;
 	void  topUp();

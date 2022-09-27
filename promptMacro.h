@@ -26,7 +26,7 @@ std::cout << starStr << std::endl
 printf("%-10s   %-10s   %-10s   %-20s\n", "commID", "unitPrice", "amount", "date")
 
 #define PRINT_AUCTION_INFO_VALUE \
-printf("%-10s   %-10lf  %-10d   %-20s\n", ptrList->commID, ptrInfo->unitPrice, ptrInfo->amount, ptrInfo->date)
+printf("%-10s   %-10lf   %-10d   %-20s\n", ptrList->commID, ptrInfo->unitPrice, ptrInfo->amount, ptrInfo->date)
 
 #define PRINT_COMM_ATTRS_NAME \
 printf("%-6s    %-20s   %-10s   %-20s     %-10s   %-10s     %-10s\n",\

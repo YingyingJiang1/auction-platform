@@ -261,8 +261,7 @@ void RuntimeFile::checkAuctionList()
         if(checkDateExpired(cur->startDate))
         {
             endAuction(cur);
-            modifyCommState(cur->commID, REMOVED);
-            /*删除当前结点*/
+            /*在竞拍列表中删除当前结点*/
             if(cur == auctionList)
             {
                 auctionList = cur->next;     
@@ -346,7 +345,20 @@ bool RuntimeFile::find(const char* name) const
     return false;
 }
 
-/*在正在竞拍的商品中查找商品ID为commID的商品，previous指向该商品*/
+/*identity分为管理员和用户，根据commID查找商品，如果找到返回true
+管理员需要在所有商品列表中搜索，用户只要搜索在拍商品*/
+bool RuntimeFile::findComm(char* seller, const char* commID, CommodityEntry* commList)
+{
+    findCommID(commID, commList);
+    if(previous)
+    {
+        assignment(previous->sellerID, seller);
+        return true;
+    }
+    return false;
+}
+
+/*在commList中查找商品ID为commID的商品，previous指向该商品节点*/
 inline void RuntimeFile::findCommID(const char* commID, CommodityEntry* commList)
 {
     /*previous为空或者previous指向的节点不是要查找的商品，需要遍历整个链表*/
@@ -362,7 +374,7 @@ inline void RuntimeFile::findCommID(const char* commID, CommodityEntry* commList
     }
 }
 
-AuctionInfo* RuntimeFile::findUserInAucLsit(const char* bidder, const char* commID)
+AuctionInfo* RuntimeFile::findUserInAucList(const char* bidder, const char* commID)
 {
     AuctionList* ptrList = auctionList;
     AuctionInfo* ptrInfo = NULL;
@@ -584,8 +596,8 @@ void RuntimeFile:: modifyCommPrice(const char* commID , double newPrice)
     writeCommsFile("w");
 }
 
-/*修改商品状态，ON_AUCTION和REMOVED*/
-void RuntimeFile::modifyCommState(const char* commID, int newState)
+/*修改商品状态，ON_AUCTION和REMOVED,成功修改返回true*/
+bool RuntimeFile::modifyCommState(const char* commID, int newState)
 {
     CommodityEntry* pre, *cur;
     /*将在拍商品下架*/
@@ -619,7 +631,10 @@ void RuntimeFile::modifyCommState(const char* commID, int newState)
         {
             if(equal(commID, cur->id))
             {
+                if(cur->amount == 0)
+                    return false;
                 cur->state = newState;
+                assignCurDate(cur->addedDate);
                 /*从下架列表中删除*/
                 if(cur == removedComms)
                     removedComms = cur->next;
@@ -635,6 +650,7 @@ void RuntimeFile::modifyCommState(const char* commID, int newState)
         }       
     }
     writeCommsFile("w");
+    return true;
 }
 
 /*根据option修改用户相对应的属性(1.用户名 2.联系方式 3.地址）*/
@@ -790,36 +806,6 @@ void RuntimeFile::readToUsers()
         }
         fclose(input);
     }
-}
-
-/*identity分为管理员和用户，根据commID查找商品，如果找到返回true
-管理员需要在所有商品列表中搜索，用户只要搜索在拍商品*/
-bool RuntimeFile::findComm(char* seller, const char* commID, int identity)
-{
-    previous = onAuctionComms;
-    while(previous)
-    {
-        if(equal(commID, previous->id))
-        {
-            assignment(previous->sellerID, seller);
-            return true;
-        }
-        previous = previous->next;
-    }
-    if(ADMIN == identity)
-    {
-        previous  = removedComms;
-        while(previous)
-        {
-            if(equal(commID, previous->id))
-            {
-                assignment(previous->sellerID, seller);
-                return true;
-            }
-            previous = previous->next;
-        }
-    }
-    return false;
 }
 
 /*查找用户名为userName的用户的ID并赋值给userID*/

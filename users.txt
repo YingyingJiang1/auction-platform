@@ -1,6 +1,6 @@
-U001,1,user111,4,nju,2066.000000,1
-U002,newUser,user222,123,modify your address,270.890000,0
-U003,new3,333,phoneNumber,modify your address,300.000000,1
-U004,user4,444,phoneNumber,modify your address,1000.000000,1
-U005,user5,555,phoneNumber,modify your address,300.000000,1
-U006,u2,222,phoneNumber,modify your address,1005.000000,1
+U001,u1,111,phoneNumber,modify your address,600.000000,1
+U002,u2,222,phoneNumber,modify your address,0.000000,1
+U003,u3,333,phoneNumber,modify your address,600.000000,1
+U004,u4,444,phoneNumber,modify your address,1000.000000,1
+U005,u5,555,phoneNumber,modify your address,1000.000000,1
+U006,u6,666,phoneNumber,modify your address,0.000000,1

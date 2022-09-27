@@ -31,6 +31,7 @@ private:
 	int maxUserSize;	
 	void assignCurDate(char* date);
 	void assignID(char, char*, int);
+	void checkAuctionList();
 	bool checkDateExpired(const char* startDate);
 	void endAuction(const AuctionList* ptr);
 	void findCommID(const char* commID, CommodityEntry* commList);
@@ -58,23 +59,28 @@ public:
 	int amount, double unitPrice);
 	void addUser(const char* name, const char* passwd);
 	bool addAuctionInfo(const char* commID, const char* buyer, double unitPrice, int amount);
-	bool beAuctioned(const char* commID);
-	void checkAuctionList();
+	bool beAuctioned(const char* commID);	
 	void checkCommExpired();
-	int commLeft(const char* commID);
     LogFlag matching(const char* name, const char* passwd) const;
 	bool find(const char* name ) const;
+	bool findComm(char* seller, const char* commID, CommodityEntry* commList) ;
+	bool findUser(const char* userID) const;
+	AuctionInfo* findUserInAucList(const char* bidder, const char* commID);
 	void getID(const char*userName, char*userID)const;
 	void modifyAuctionInfo(const char* bidder, const char* commID,int option);
 	void modifyCommPrice(const char* commID , double newPrice);
 	void modifyCommDesc(const char* commID, const char* newDescription);
-	void modifyCommState(const char*commID, int newState);
+	bool modifyCommState(const char*commID, int newState);
 	void modifyUserAttr(const char* userID, const char* newInfo, int option);
 	int modifyUserBal(const char* userID, double money);
 	void modifyUserState(const char* userID);
-	bool findComm(char* seller, const char* commID, int identity) ;
-	bool findUser(const char* userID) const;
-	AuctionInfo* findUserInAucLsit(const char* bidder, const char* commID);
+	CommodityEntry* onAuctionCommList(){
+		return onAuctionComms;
+	}
+	CommodityEntry* removedCommList()
+	{
+		return removedComms;
+	}
 	void showAllUsers()const;
 	void showAllComms(int identity)const;
 	void showAuctions(char* bidder) const;

@@ -20,7 +20,7 @@ void User::auction()
    fgets(commID, MAX_ID_SIZE+1, stdin);
    if(checkID('M', commID))
    {
-       bool found = file.findComm(seller, commID, USER);
+       bool found = file.findComm(seller, commID, file.onAuctionCommList());
        if(found)
        {
            if(equal(seller, userID))
@@ -28,7 +28,7 @@ void User::auction()
                std::cout << "您不能参与自己发布的商品的竞拍！" << std::endl << std::endl;
                return;
            }
-           if(file.findUserInAucLsit(userID, commID))
+           if(file.findUserInAucList(userID, commID))
            {
                std::cout << "您已参与了该商品的竞拍，请不要重复参与！" << std::endl << std::endl;
                return;
@@ -97,7 +97,7 @@ void User::modifyCommInfo() const
     fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
     {
-        bool found = file.findComm(seller, id, USER);        
+        bool found = file.findComm(seller, id, file.onAuctionCommList());        
         if(!found || !equal(seller, userID))
         {
             PROMPT_MODIFICATION_FAILURE("未在您发布的商品中找到该ID的商品");
@@ -154,7 +154,7 @@ void User::pullCommodity()
     fgets(commID, MAX_ID_SIZE+1, stdin);
     if(checkID('M', commID))
     {
-        bool found = file.findComm(seller, commID, USER);
+        bool found = file.findComm(seller, commID, file.onAuctionCommList());
         if(!found || !equal(seller, userID))
         {
             PROMPT_PULL_FAILURE("未在您发布的商品中找到该ID的商品");
@@ -189,14 +189,23 @@ void User::putawayComm() const
 {
     PRINT_STAR_STRING;
     std::cout << "请输入您要重新上架的商品的ID：" ;
-    char commID[MAX_COMM_NAME_SIZE+1];
+    char commID[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
     fgets(commID, MAX_COMM_NAME_SIZE+1, stdin);
-    if(checkStr(commID, MAX_COMM_NAME_SIZE+1))
+    if(checkID('M',commID))
     {
-
+        file.findComm(seller, commID, file.removedCommList());
+        if(equal(userID, seller))
+        {
+            if(file.modifyCommState(commID, ON_AUCTION))
+                std::cout << "重新上架成功！" << std::endl;
+            else
+                std::cout << "该商品无余货，无法重新上架！" << std::endl;               
+        }
+        else  
+            std::cout << "未在您的下架商品中找到该ID的商品" << std::endl;
     }
     else    
-        std::cout << "商品输入不合法，重新上架失败！" << std::endl;
+        std::cout << "商品ID输入不合法，重新上架失败！" << std::endl;
     PRINT_STAR_STRING;
 }
 
@@ -390,7 +399,7 @@ void User::viewCommDetail() const
     fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
     {
-        bool found = file.findComm(seller, id, USER);
+        bool found = file.findComm(seller, id, file.onAuctionCommList());
         if(found)
             file.showCommDetail(id);    
         else

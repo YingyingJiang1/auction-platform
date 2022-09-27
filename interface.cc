@@ -207,6 +207,7 @@ void enterSellerIntf(User *user)
             break;
         case SELLER_PUTAWAY_COMM:
             user->putawayComm();
+            break;
         case SELLER_BACK_TO_USER_INTF:
             return;
         default:
@@ -326,7 +327,7 @@ void promptUser()
 void promptSeller()
 {
     cout << str <<endl;
-    cout << "1.发布商品 2.查看发布商品 3.修改商品信息 4.下架商品 5.查看历史订单 6.返回用户主界面";
+    cout << "1.发布商品 2.查看发布商品 3.修改商品信息 4.下架商品 5.查看历史订单 6.重新上架商品 7.返回用户主界面";
     cout << endl;
     cout << str << endl;
     cout << "请输入要进行的操作的编号：";
