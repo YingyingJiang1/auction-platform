@@ -32,7 +32,7 @@ void Administrator::banUser() const
             cin >> confirm;
             if(tolower(confirm) == 'y')
             {
-                file.modifyUserState(userID);
+                file.modifyUserState(userID, INACTIVE);
                 std::cout << "封禁成功！" << endl << endl;
             }
             else
@@ -95,6 +95,27 @@ void Administrator::searchCommodities() const
     file.showSpecificComms(commName, ADMIN);    
 }
 
+void Administrator::unbanUser() const
+{
+    char userID[MAX_ID_SIZE+1];
+    std::cout << "请输入您要解除封禁的用户的ID：";
+    fgets(userID, MAX_ID_SIZE+1, stdin);
+    if(checkID('U', userID))
+    {
+        if(file.modifyUserState(userID, ACTIVE))
+            std::cout << "成功解封用户 " << userID << " ！" << std::endl << std::endl;
+        else
+            std::cout << "该用户不存在或该用户未被封禁！" << std::endl << std::endl;
+    }
+    else
+        std::cout << "用户ID输入不合法，解封用户失败！" << std::endl << std::endl;
+}
+
+void Administrator::viewAllBannedUsers() const
+{
+    file.showInactiveUsers();
+}
+
 void Administrator::viewCommodities() const
 {
     file.showAllComms(ADMIN);
@@ -104,4 +125,3 @@ void Administrator::viewOrders() const
 {
     file.showAllOrders();
 }
-

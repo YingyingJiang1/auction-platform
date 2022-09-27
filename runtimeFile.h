@@ -20,6 +20,7 @@ private:
 	CommodityEntry* onAuctionComms;
 	CommodityEntry* removedComms;
 	AuctionList* auctionList;
+	AuctionList* listTail;
 	/*存储上一次搜索到的位置,对于连续搜索同一个商品ID的情况
 	只需要遍历链表一次就可以实现*/
 	CommodityEntry* previous;
@@ -66,14 +67,14 @@ public:
 	bool findComm(char* seller, const char* commID, CommodityEntry* commList) ;
 	bool findUser(const char* userID) const;
 	AuctionInfo* findUserInAucList(const char* bidder, const char* commID);
-	void getID(const char*userName, char*userID)const;
+	void getUserID(const char*userName, char*userID)const;
 	void modifyAuctionInfo(const char* bidder, const char* commID,int option);
 	void modifyCommPrice(const char* commID , double newPrice);
 	void modifyCommDesc(const char* commID, const char* newDescription);
 	bool modifyCommState(const char*commID, int newState);
 	void modifyUserAttr(const char* userID, const char* newInfo, int option);
 	int modifyUserBal(const char* userID, double money);
-	void modifyUserState(const char* userID);
+	bool modifyUserState(const char* userID, int newState);
 	CommodityEntry* onAuctionCommList(){
 		return onAuctionComms;
 	}
@@ -84,6 +85,7 @@ public:
 	void showAllUsers()const;
 	void showAllComms(int identity)const;
 	void showAuctions(char* bidder) const;
+	void showInactiveUsers()const;
 	void showSellerComms(const char* sellerID);
 	void showCommDetail(const char* commID);
 	void showSpecificComms(char* name, int identity)const ;

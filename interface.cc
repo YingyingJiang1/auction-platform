@@ -1,4 +1,4 @@
-#include "logAndSign.h"
+#include "mainIntfFunc.h"
 #include "menuNumber.h"
 void exitRun()
 {
@@ -21,6 +21,7 @@ void promptPersonalInfo();
 void enterAdmIntf(Administrator *);
 void enterUserIntf(User *);
 void checkAuctionExpired();
+
 extern  char  starStr[];
 static char str[120] = "===================================================================================="
 "===============================";
@@ -107,6 +108,12 @@ void enterAdmIntf(Administrator *adm)
             break;
         case ADM_BAN_USER:
             adm->banUser();
+            break;
+        case  ADM_UNBAN_USER:
+            adm->unbanUser();
+            break;
+        case ADM_VIEW_BANNED_USERS:
+            adm->viewAllBannedUsers();
             break;
         case ADM_LOG_OUT:
             return;
@@ -248,6 +255,9 @@ void enterInfoManageIntf(User *user)
         case TOP_UP:
             user->topUp();
             break;
+        case MODIFY_PASSWD:
+            user->modifyPasswd();
+            break;
         case BACK_TO_USER_INTF:
             return;
         default:
@@ -310,7 +320,7 @@ void prompt()
 void promptAdm()
 {
     cout << str << endl;
-    cout << "1.查看所有商品 2.搜索商品 3.下架商品 4.查看所有订单 5.查看所有用户 6.封禁用户 7.注销";
+    cout << "1.查看所有商品 2.搜索商品 3.下架商品 4.查看所有订单 5.查看所有用户 6.封禁用户 7.查看被封禁用户 8.解封用户 9.注销";
     cout << endl;
     cout << str << endl;
     cout << "请输入要进行的操作的编号：";
@@ -345,7 +355,7 @@ void promptBuyer()
 void promptPersonalInfo()
 {
     cout << str << endl;
-    cout << "       1.查看信息      2.修改信息      3.充值      4.返回用户主界面" << endl;
+    cout << "       1.查看信息      2.修改信息      3.充值      4.修改密码      5.返回用户主界面" << endl;
     cout << str << endl;
     cout << "请输入要进行的操作的编号：";
 }

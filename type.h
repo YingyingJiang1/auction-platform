@@ -11,6 +11,11 @@
 #define SELLER 2
 #define ADMIN 1
 #define USER 0
+/*属性*/
+#define USER_NAME 1
+#define PHONE_NUMBER 2
+#define ADDRESS 3
+#define PASSWD 4
 
 /*各属性所占空间大小*/
 #define MAX_ID_SIZE 4

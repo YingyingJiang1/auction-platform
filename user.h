@@ -14,6 +14,7 @@ public:
 	void auction();	
 	void modifyAuction();
 	void modifyCommInfo()const;	
+	void modifyPasswd() const;
 	void modifyUserInfo();
 	void pullCommodity();
 	void putawayComm()const;

@@ -7,10 +7,7 @@ printf("%-6s    %-20s   %-10lf   %-20s     %-10d   %-10s     %-10d\n",\
 
 User::User(const char* nameInputed)
 {
-    char ret[MAX_ID_SIZE+1];
-    file.getID(nameInputed, ret);
-    assignment(nameInputed,name);
-    assignment(ret, userID);
+    file.getUserID(nameInputed, userID);
 }
 
 void User::auction()
@@ -185,9 +182,22 @@ void User::pullCommodity()
         PROMPT_PULL_FAILURE("商品ID输入不合法");
 }
 
+void User::modifyPasswd() const
+{
+    char newPasswd[MAX_PASSEWD_SIZE+1];
+    std::cout << "请输入新密码(密码仅由字母和数字组成且不超过20个字符)：" ;
+    fgets(newPasswd, MAX_PASSEWD_SIZE+1, stdin);
+    if(checkAlnum(newPasswd, MAX_PASSEWD_SIZE))
+    {
+        file.modifyUserAttr(userID, newPasswd, PASSWD);
+        PROMPT_MODIFICATION_SUCCEEED;
+    }        
+    else
+        PROMPT_MODIFICATION_FAILURE("密码输入不合法");
+}
+
 void User::putawayComm() const
 {
-    PRINT_STAR_STRING;
     std::cout << "请输入您要重新上架的商品的ID：" ;
     char commID[MAX_ID_SIZE+1], seller[MAX_ID_SIZE+1];
     fgets(commID, MAX_COMM_NAME_SIZE+1, stdin);
@@ -197,16 +207,15 @@ void User::putawayComm() const
         if(equal(userID, seller))
         {
             if(file.modifyCommState(commID, ON_AUCTION))
-                std::cout << "重新上架成功！" << std::endl;
+                std::cout << "重新上架成功！" << std::endl << std::endl;
             else
-                std::cout << "该商品无余货，无法重新上架！" << std::endl;               
+                std::cout << "该商品无余货，无法重新上架！" << std::endl << std::endl;               
         }
         else  
-            std::cout << "未在您的下架商品中找到该ID的商品" << std::endl;
+            std::cout << "未在您的下架商品中找到该ID的商品" << std::endl << std::endl;
     }
     else    
-        std::cout << "商品ID输入不合法，重新上架失败！" << std::endl;
-    PRINT_STAR_STRING;
+        std::cout << "商品ID输入不合法，重新上架失败！" << std::endl << std::endl;
 }
 
 void User::modifyUserInfo()
@@ -236,7 +245,7 @@ void User::modifyUserInfo()
                         PROMPT_MODIFICATION_FAILURE("用户名已存在");
                     else
                     {                                          
-                        file.modifyUserAttr(id, newName, 1);
+                        file.modifyUserAttr(id, newName, USER_NAME);
                         PROMPT_MODIFICATION_SUCCEEED;
                     }                   
                 }
@@ -251,7 +260,7 @@ void User::modifyUserInfo()
                 fgets(newPhone, MAX_PHONENUMBER_SIZE+1, stdin);
                 if(checkDigits(newPhone,MAX_PHONENUMBER_SIZE))
                 {
-                    file.modifyUserAttr(id, newPhone, 2);
+                    file.modifyUserAttr(id, newPhone, PHONE_NUMBER);
                     PROMPT_MODIFICATION_SUCCEEED;            
                 }
                 else
@@ -268,7 +277,7 @@ void User::modifyUserInfo()
                 fgets(newAddress, MAX_ADDRESS_SIZE+1, stdin);
                 if(checkStr(newAddress,MAX_ADDRESS_SIZE))
                 {
-                    file.modifyUserAttr(id, newAddress, 3);
+                    file.modifyUserAttr(id, newAddress, ADDRESS);
                     PROMPT_MODIFICATION_SUCCEEED;                          
                 }
                 else

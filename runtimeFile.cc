@@ -3,13 +3,21 @@
 #include<cstdio>
 #include<ctime>
 #include<assert.h>
-#define ID_SIZE 4
 #define PRINT_COMM_ATTRS_VALUE \
 printf("%-6s    %-20s   %-10lf   %-20s     %-10d   %-10s     %-10s\n",\
             cur->id, cur->name, cur->price, cur->addedDate,\
             cur->amount, cur->sellerID, cur->state?"ON_AUCTION":"REMOVED")
+#define PRINT_USER_ATTRS_VALUE \
+printf("%-6s    %-10s   %-20s   %-40s   %-10lf   %-10s\n", \
+            usersFile[i].id,usersFile[i].name,usersFile[i].phone, usersFile[i].address, \
+            usersFile[i].balance,usersFile[i].state==ACTIVE?"ACTIVE":"INACTIVE");
 char starStr[120] = "***************************************************************************************************************";
-
+inline int min(int a, int b){
+    return a < b?a:b;
+}
+inline int max(int a, int b){
+    return a > b? a: b;
+}
 RuntimeFile::RuntimeFile(int defaultSize )
 {
     size = defaultSize * 10;
@@ -20,6 +28,7 @@ RuntimeFile::RuntimeFile(int defaultSize )
     orderSize =  0;
     commAmount = 0;
     auctionList = NULL;
+    listTail = NULL;
     onAuctionComms = NULL;
     removedComms = NULL;
     previous = NULL;
@@ -125,18 +134,34 @@ bool RuntimeFile::addAuctionInfo(const char* commID, const char* buyer, double u
         cur = cur->next;
     }
     /*竞拍列表没有该商品ID的竞拍信息，需要
-    先创建*/
+    先创建, 要保证竞拍列表中的节点按照商品的发布时间升序排列*/
     if(NULL == cur)
     {
         AuctionList* ptr = new AuctionList;
+        ptr->next = NULL;
         assignment(commID, ptr->commID);
         findCommID(commID, onAuctionComms);
         assignment(previous->addedDate, ptr->startDate);
         ptr->bidderNum = 1;
         ptr->head = NULL;
-        ptr->next = auctionList;
-        auctionList = ptr;
-
+        if(NULL == auctionList)
+            auctionList = ptr;
+        else
+        {
+            AuctionList* listCur = auctionList, *listPre = listCur;
+            while(listCur)
+            {
+                if(!myGreater(ptr->startDate, listCur->startDate))
+                    break;
+                listPre = listCur;
+                listCur = listCur->next;
+            }
+            ptr->next = listCur;
+            if(auctionList == listCur)
+                auctionList = ptr;
+            else
+                listPre->next = ptr;
+        }            
         ptrInfo->next = ptr->head;
         ptr->head = ptrInfo;
         writeAuctionFile("w");
@@ -174,13 +199,13 @@ void RuntimeFile::addUser(const char* name, const char* passwd)
 void RuntimeFile::assignID(char category, char* id, int amount)
 {
     id[0] = category;
-    char str[ID_SIZE];
+    char str[MAX_ID_SIZE+1];
     /*%03d means if "amount" is less than three digits then make up 0 in front */
     sprintf(str, "%03d", amount);
 
-    for(int i = 1; i < ID_SIZE; ++i)
+    for(int i = 1; i < MAX_ID_SIZE; ++i)
         id[i] = str[i-1];
-    id[ID_SIZE] = 0;
+    id[MAX_ID_SIZE] = 0;
 }
 
 /*日期格式为：年-月-日 时:分:秒*/
@@ -301,36 +326,30 @@ void RuntimeFile::checkCommExpired()
 void RuntimeFile::endAuction(const AuctionList* ptr)
 {
     findCommID(ptr->commID, onAuctionComms);
-    int left = previous->amount;
+    int left = previous->amount, sumPrice = 0, tradeAmount = 0;
     AuctionInfo* curPtr = ptr->head;
+    /*将当前商品的所有竞拍进行结算*/
     while(curPtr && left > 0)
     {
         int i = getIndex(curPtr->bidderID);
-        if(usersFile[i].balance < curPtr->unitPrice* curPtr->amount)
+        int j = getIndex(previous->sellerID);
+        tradeAmount = min(left,curPtr->amount);
+        sumPrice = curPtr->unitPrice* tradeAmount;
+        if(usersFile[i].balance >= sumPrice)
         {
-            curPtr = curPtr->next;
-            continue;
-        }
-        if(left >= curPtr->amount)
-        {
-            usersFile[i].balance -= curPtr->unitPrice * curPtr->amount;
-            writeUsersFile("w");            
-            addOrder(ptr->commID, curPtr->bidderID, previous->sellerID, curPtr->amount, curPtr->unitPrice);           
-            left -= curPtr->amount; 
-        }
-        else
-        {
-            usersFile[i].balance -= curPtr->unitPrice * left;
+            usersFile[i].balance -= sumPrice;
+            usersFile[j].balance += sumPrice;
             writeUsersFile("w");
-            addOrder(ptr->commID, curPtr->bidderID, previous->sellerID, left, curPtr->unitPrice);
-            left = 0;
-            break;
+            addOrder(ptr->commID, curPtr->bidderID, previous->sellerID, tradeAmount, curPtr->unitPrice);      
+            left -= tradeAmount;
         }
         curPtr = curPtr->next;
     }
     previous->amount = left;
+    /*释放为该商品存储的竞拍信息*/
     if(ptr->head)
         freeList(ptr->head);
+
     modifyCommState(ptr->commID, REMOVED);
     writeCommsFile("w");
 }
@@ -361,6 +380,10 @@ bool RuntimeFile::findComm(char* seller, const char* commID, CommodityEntry* com
 /*在commList中查找商品ID为commID的商品，previous指向该商品节点*/
 inline void RuntimeFile::findCommID(const char* commID, CommodityEntry* commList)
 {
+    /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    由于在某些函数中使用了previous来指向下架商品链表中的节点，所以不确定在某些只对在拍商品链表进行搜索的
+    调用中会不会出现错误，目前来看是没有问题的
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
     /*previous为空或者previous指向的节点不是要查找的商品，需要遍历整个链表*/
     if(!previous || !equal(commID, previous->id))
     {
@@ -546,7 +569,7 @@ void RuntimeFile::modifyAuctionInfo(const char* bidder, const char* commID, int 
         else
             PROMPT_MODIFICATION_FAILURE("竞拍数量输入不合法");
     }
-    /*删除对该商品的竞拍，当该商品没有被竞拍时，从auctionList中删除为该商品维护的竞拍节点*/
+    /*删除对该商品的竞拍，当该商品所有竞拍信息都被删除时，从auctionList中删除为该商品维护的竞拍节点*/
     else if(3 == option)
     {
         if(curInfo == ptrList->head)
@@ -658,14 +681,17 @@ void RuntimeFile::modifyUserAttr(const char* userID, const char* newInfo, int op
 {
     int i = getIndex(userID);
     /*修改用户名*/
-    if(1 == option)
+    if(USER_NAME == option)
         assignment(newInfo, usersFile[i].name);
     /*修改联系方式*/
-    else if(2 == option)
+    else if(PHONE_NUMBER == option)
         assignment(newInfo, usersFile[i].phone);
     /*修改地址*/
-    else if(3 == option)
+    else if(ADDRESS == option)
         assignment(newInfo, usersFile[i].address);
+    /*修改密码*/
+    else if(PASSWD == option)
+        assignment(newInfo, usersFile[i].passwd);
     
     writeUsersFile("w");
 }
@@ -679,11 +705,14 @@ int RuntimeFile::modifyUserBal(const char* userID, double money)
     return usersFile[i].balance;
 }
 
-void RuntimeFile::modifyUserState(const char* userID)
+bool RuntimeFile::modifyUserState(const char* userID, int newState)
 {
     int i = getIndex(userID);
-    usersFile[i].state = INACTIVE;
+    if(i == usersSize || usersFile[i].state == newState)
+        return false;
+    usersFile[i].state = newState;
     writeUsersFile("w");
+    return true;
 }
 
 void RuntimeFile::overflowProcess()
@@ -709,13 +738,18 @@ void RuntimeFile::readToAucList()
         while(1)
         {
             ptrList = new AuctionList;
+            ptrList->next = NULL;
             ret = fscanf(input, "%[^,]%*c%[^,]%*c%d\n",
                                 ptrList->commID,ptrList->startDate, &ptrList->bidderNum);
              if(ret != 3)
                 break;
             ptrList->head = NULL;
-            ptrList->next = auctionList;
-            auctionList = ptrList;           
+            if(NULL == auctionList)
+                auctionList = ptrList;           
+            else
+                listTail->next = ptrList;
+            listTail = ptrList;
+           
             for(int i = 0; i < ptrList->bidderNum; ++i)
             {
                 ptrInfo = new AuctionInfo;
@@ -809,7 +843,7 @@ void RuntimeFile::readToUsers()
 }
 
 /*查找用户名为userName的用户的ID并赋值给userID*/
-void RuntimeFile::getID(const char*userName, char* userID)const
+void RuntimeFile::getUserID(const char*userName, char* userID)const
 {
     for(int i = 0; i < usersSize; ++i)
         if(equal(userName, usersFile[i].name))
@@ -912,6 +946,27 @@ void RuntimeFile::showCommDetail(const char* commID)
         std::cout << "商品状态：" << "ON_AUCTION" << std::endl;
     else
         std::cout << "商品状态" << "REMOVED" << std::endl;
+    PRINT_STAR_STRING;
+}
+
+void RuntimeFile::showInactiveUsers()const
+{
+    PRINT_STAR_STRING;
+    bool printed = false;
+    for(int i = 0; i < usersSize; ++i)
+    {
+        if(usersFile[i].state == INACTIVE)
+        {
+            if(!printed)
+            {
+                PRINT_USER_ATTRS_NAME;
+                printed = true;
+            }
+            PRINT_USER_ATTRS_VALUE;
+        }
+    }
+    if(!printed)
+        PROMPT_NO_INFO("封禁用户");
     PRINT_STAR_STRING;
 }
 
@@ -1109,6 +1164,7 @@ void RuntimeFile::showUserInfo(const char* userID) const
 {
     int i = getIndex(userID);
     PRINT_STAR_STRING;
+    std::cout << "用户ID：" << usersFile[i].id << std::endl;
     std::cout << "用户名：" << usersFile[i].name << std::endl;
     std::cout << "联系方式：" <<usersFile[i]. phone << std::endl;
     std::cout << "地址：" <<usersFile[i]. address << std::endl;

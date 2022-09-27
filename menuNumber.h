@@ -21,7 +21,9 @@ using namespace std;
 #define ADM_VIEW_ALL_ORDERS 4
 #define ADM_VIEW_ALL_USERS 5
 #define ADM_BAN_USER 6
-#define ADM_LOG_OUT 7
+#define ADM_VIEW_BANNED_USERS 7
+#define ADM_UNBAN_USER 8
+#define ADM_LOG_OUT 9
 
 /*卖家操作菜单编号*/
 #define SELLER_RELEASE_COMM 1
@@ -46,6 +48,7 @@ using namespace std;
 #define VIEW_INFO 1
 #define MODIFY_INFO 2
 #define TOP_UP 3
-#define BACK_TO_USER_INTF 4
+#define MODIFY_PASSWD 4
+#define BACK_TO_USER_INTF 5
 
 #endif

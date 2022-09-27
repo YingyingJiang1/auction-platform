@@ -10,11 +10,13 @@ public:
 	Administrator(){}
 	Administrator(string n, string p){}
 	void banUser()const;
+	void unbanUser()const;
 	void pullCommodity() const;
 	void searchCommodities() const;
+	void viewAllBannedUsers()const;
 	void viewUsers()const;
-	virtual void viewCommodities() const;	
-	virtual void viewOrders() const;
+	void viewCommodities() const;	
+	void viewOrders() const;
 };
 #endif
 
