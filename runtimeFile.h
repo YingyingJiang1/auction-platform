@@ -40,6 +40,8 @@ private:
 	void freeList(T* head);
 	int getIndex(const char* id) const;		
 	void overflowProcess();	
+	void printSellerComms(CommodityEntry* commList, const char* sellerID, bool& printed) const;
+	void printComms(CommodityEntry* commList, bool& printed) const;
 	void readToAucList();
     void readToUsers();
 	void readToComms();

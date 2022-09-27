@@ -15,9 +15,7 @@ char starStr[120] = "***********************************************************
 inline int min(int a, int b){
     return a < b?a:b;
 }
-inline int max(int a, int b){
-    return a > b? a: b;
-}
+
 RuntimeFile::RuntimeFile(int defaultSize )
 {
     size = defaultSize * 10;
@@ -67,6 +65,7 @@ RuntimeFile::RuntimeFile(const RuntimeFile& rFile)
 
 }
 
+/*新增商品，将商品写入商品文件*/
 void RuntimeFile::addCommodity(const char* seller , const char* name, double price, int amount, const char*description)
 {
     ++commAmount;
@@ -85,9 +84,11 @@ void RuntimeFile::addCommodity(const char* seller , const char* name, double pri
     writeCommsFile("a");
 }
 
+/*新增订单，将订单写入订单文件*/
 OrderEntry* RuntimeFile::addOrder(const char* commID, const char* buyerID, const char* sellerID,
 	int amount, double unitPrice)
 {    
+    /*为订单的各属性赋值*/
     if(orderSize == size)
         overflowProcess();
     assignment(commID, ordersFile[orderSize].commodityID);
@@ -105,6 +106,7 @@ OrderEntry* RuntimeFile::addOrder(const char* commID, const char* buyerID, const
 /*有新用户参与竞拍，在竞拍列表中新增一条竞拍信息,新增成功返回true*/
 bool RuntimeFile::addAuctionInfo(const char* commID, const char* buyer, double unitPrice, int amount)
 {
+    /*对用户的竞拍数量和余额进行检查*/
     findCommID(commID, onAuctionComms);
     if(amount > previous->amount)
     {
@@ -125,7 +127,7 @@ bool RuntimeFile::addAuctionInfo(const char* commID, const char* buyer, double u
     ptrInfo->amount = amount;    
     ptrInfo->unitPrice = unitPrice;
 
-    /*先在竞拍列表中查找该商品ID是否存在*/
+    /*先在竞拍列表中查找该商品ID的节点是否存在*/
     AuctionList* cur = auctionList;
     while(cur)
     {
@@ -144,6 +146,7 @@ bool RuntimeFile::addAuctionInfo(const char* commID, const char* buyer, double u
         assignment(previous->addedDate, ptr->startDate);
         ptr->bidderNum = 1;
         ptr->head = NULL;
+        /*对竞拍列表根据商品的发布时间进行排序*/
         if(NULL == auctionList)
             auctionList = ptr;
         else
@@ -162,6 +165,7 @@ bool RuntimeFile::addAuctionInfo(const char* commID, const char* buyer, double u
             else
                 listPre->next = ptr;
         }            
+        /*为该商品加入竞拍信息并写入竞拍文件*/
         ptrInfo->next = ptr->head;
         ptr->head = ptrInfo;
         writeAuctionFile("w");
@@ -180,8 +184,10 @@ bool RuntimeFile::addAuctionInfo(const char* commID, const char* buyer, double u
     }
 }
 
+/*新增用户写入用户文件*/
 void RuntimeFile::addUser(const char* name, const char* passwd)
 {
+    /*为用户各属性赋值*/
     assignment(name, usersFile[usersSize].name);
     assignment(passwd, usersFile[usersSize].passwd);
     assignment("modify your address", usersFile[usersSize].address);
@@ -195,7 +201,7 @@ void RuntimeFile::addUser(const char* name, const char* passwd)
    writeUsersFile("a");
 }
 
-/*convert the numeric value "amount" to array of char*/
+/*将数值amount转换为三位字符串（不足三位在前面补0），然后将转换得到的字符串赋值给id*/
 void RuntimeFile::assignID(char category, char* id, int amount)
 {
     id[0] = category;
@@ -221,6 +227,7 @@ void RuntimeFile::assignCurDate(char* date)
                         ptminfo->tm_hour, ptminfo->tm_min, ptminfo->tm_sec);
 }
 
+/*检查ID为commID的商品是否有用户参与竞拍，有则返回true*/
 bool RuntimeFile::beAuctioned(const char* commID)
 {
     AuctionList* ptrList = auctionList;
@@ -232,7 +239,7 @@ bool RuntimeFile::beAuctioned(const char* commID)
     return false;
 }
 
-/*日期格式：xxxx-xx-xx xx:xx:xx*/
+/*获取当前时间并减去24小时，如果比startDate大则返回true*/
 bool RuntimeFile::checkDateExpired(const char* startDate)
 {
     char nowDate[MAX_DATE_SIZE+1];
@@ -277,6 +284,8 @@ bool RuntimeFile::checkDateExpired(const char* startDate)
     return false;
 }
 
+/*检查竞拍列表中的商品是否到期，如果到期就进行结算，为成功竞拍的用户创建相应订单，
+并把已经完成结算的商品节点从竞拍列表中删去*/
 void RuntimeFile::checkAuctionList()
 {
     AuctionList* cur = auctionList, *pre = cur;
@@ -310,6 +319,7 @@ void RuntimeFile::checkAuctionList()
     }
 }
 
+/*检查所有在拍商品是否到期，到期就下架*/
 void RuntimeFile::checkCommExpired()
 {
     checkAuctionList();
@@ -354,6 +364,7 @@ void RuntimeFile::endAuction(const AuctionList* ptr)
     writeCommsFile("w");
 }
 
+/*查找是否有用户名为name的用户，有就返回true*/
 bool RuntimeFile::find(const char* name) const
 {
     for(int i = 0; i < usersSize; ++i)
@@ -364,10 +375,10 @@ bool RuntimeFile::find(const char* name) const
     return false;
 }
 
-/*identity分为管理员和用户，根据commID查找商品，如果找到返回true
-管理员需要在所有商品列表中搜索，用户只要搜索在拍商品*/
+/*在commList中寻找ID为commID的商品，如果找到把该商品的卖家ID赋给seller,然后返回true*/
 bool RuntimeFile::findComm(char* seller, const char* commID, CommodityEntry* commList)
 {
+    int state = (commList == onAuctionComms) ? ON_AUCTION: REMOVED;
     findCommID(commID, commList);
     if(previous)
     {
@@ -380,11 +391,8 @@ bool RuntimeFile::findComm(char* seller, const char* commID, CommodityEntry* com
 /*在commList中查找商品ID为commID的商品，previous指向该商品节点*/
 inline void RuntimeFile::findCommID(const char* commID, CommodityEntry* commList)
 {
-    /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    由于在某些函数中使用了previous来指向下架商品链表中的节点，所以不确定在某些只对在拍商品链表进行搜索的
-    调用中会不会出现错误，目前来看是没有问题的
-    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
     /*previous为空或者previous指向的节点不是要查找的商品，需要遍历整个链表*/
+    
     if(!previous || !equal(commID, previous->id))
     {
         previous = commList;
@@ -395,8 +403,18 @@ inline void RuntimeFile::findCommID(const char* commID, CommodityEntry* commList
             previous = previous->next;
         }            
     }
+    else
+    {
+        /*防止出现此类情况：previous保留的历史值所指向的节点恰好是目标商品，因此不用进行链表遍历，
+        但可能出现该商品是下架状态，而本次调用要求在在拍商品链表中进行搜索（不确定会不会出现这种情况，但还是
+        加上这个判断比较好）*/
+        int state = commList == onAuctionComms ? ON_AUCTION: REMOVED;
+        if(previous->state != state)
+            previous = NULL;
+    }
 }
 
+/*如果用户ID为bidder的用户参与了商品ID为commID的竞拍，返回true*/
 AuctionInfo* RuntimeFile::findUserInAucList(const char* bidder, const char* commID)
 {
     AuctionList* ptrList = auctionList;
@@ -418,6 +436,7 @@ AuctionInfo* RuntimeFile::findUserInAucList(const char* bidder, const char* comm
     return NULL;
 }
 
+/*释放头节点为head的链表的内存空间*/
 template<typename T>
 void RuntimeFile::freeList(T* head)
 {
@@ -429,7 +448,8 @@ void RuntimeFile::freeList(T* head)
         delete tmp;
     }
 }
-/*查找ID为id的文件条目的索引*/
+
+/*查找ID为id的用户或订单文件条目的索引*/
 int RuntimeFile::getIndex(const char* id) const
 {
     int i = 0;
@@ -449,7 +469,7 @@ int RuntimeFile::getIndex(const char* id) const
     return i;
 }
 
-
+/*检查用户名和密码是否匹配*/
 LogFlag RuntimeFile::matching(const char* name, const char* passwd) const
 {
     int i = 0;
@@ -602,24 +622,17 @@ void RuntimeFile::modifyCommDesc(const char* commID, const char* newDescription)
     writeCommsFile("w");
 }
 
+/*修改在拍商品的价格*/
 void RuntimeFile:: modifyCommPrice(const char* commID , double newPrice)
 {
-    if(previous && equal(previous->id, commID) )
+    findCommID(commID, onAuctionComms);
+    if(previous)
         previous->price = newPrice;
-    else
-    {
-        previous = onAuctionComms;
-        while(previous)
-        {
-            if(equal(previous->id, commID) )
-                previous->price = newPrice;
-            previous = previous->next;
-        }
-    }
     writeCommsFile("w");
+    
 }
 
-/*修改商品状态，ON_AUCTION和REMOVED,成功修改返回true*/
+/*修改商品状态为newState,成功修改返回true*/
 bool RuntimeFile::modifyCommState(const char* commID, int newState)
 {
     CommodityEntry* pre, *cur;
@@ -654,6 +667,7 @@ bool RuntimeFile::modifyCommState(const char* commID, int newState)
         {
             if(equal(commID, cur->id))
             {
+                /*商品数量为0时不可以重新上架*/
                 if(cur->amount == 0)
                     return false;
                 cur->state = newState;
@@ -861,47 +875,55 @@ bool RuntimeFile::findUser(const char* userID) const
     return false;
 }
 
+inline void RuntimeFile::printComms(CommodityEntry* commList, bool& printed) const
+{
+    CommodityEntry* cur = commList;
+    while(cur)
+    {
+        if(!printed)
+        {
+            PRINT_COMM_ATTRS_NAME;
+            printed = true;
+        }
+        PRINT_COMM_ATTRS_VALUE;
+        cur = cur->next;
+    }
+}
+
+/*在commList查找并打印卖家ID为sellerID的商品，printed保证最多只打印一边用户属性名*/
+inline void RuntimeFile::printSellerComms(CommodityEntry* commList,  const char* sellerID, bool& printed) const
+{
+    CommodityEntry* cur = commList;
+    while(cur)
+    {
+        if(equal(sellerID, cur->sellerID))
+        {
+            if(!printed)
+            {
+                PRINT_COMM_ATTRS_NAME;
+                printed = true;
+            }
+            PRINT_COMM_ATTRS_VALUE;
+        }
+        cur = cur->next;
+    }
+}
+
 /*打印所有商品列表，identity为管理员打印在拍和下架商品，
 identity为用户只打印在拍商品*/
 void RuntimeFile::showAllComms(int identity) const
 {
-    /*flag用于防止输出多行属性名*/
-    bool flag = true;
+    bool printed = false;
     PRINT_STAR_STRING;
-    /*输出正在拍卖的商品,如果有的话*/
-    if(onAuctionComms)
-    {
-        PRINT_COMM_ATTRS_NAME;
-        flag = false;        
-    }     
-    else if(identity == USER)
-        std::cout << "没有在拍卖的商品!" << std::endl << std::endl;   
-    CommodityEntry* cur = onAuctionComms;
-    while(cur)
-    {
-        PRINT_COMM_ATTRS_VALUE;
-        cur = cur->next;
-    }
-    /*输出已下架的商品*/
+    printComms(onAuctionComms, printed);
     if(identity == ADMIN)
-    {
-        if(flag && removedComms)
-        {
-            PRINT_COMM_ATTRS_NAME;  
-            flag = false;
-        }     
-        if(flag)
-            std::cout << "没有任何商品信息" << std::endl << std::endl;       
-        cur = removedComms;
-        while(cur)
-        {
-            PRINT_COMM_ATTRS_VALUE;
-            cur = cur->next;
-        }
-    }    
+        printComms(removedComms, printed);
+    if(!printed)
+        PROMPT_NO_INFO("商品");
     PRINT_STAR_STRING;
 }
 
+/*打印竞拍者ID为bidder的竞拍信息*/
 void RuntimeFile::showAuctions(char* bidder) const
 {    
     AuctionList* ptrList = auctionList;
@@ -949,6 +971,7 @@ void RuntimeFile::showCommDetail(const char* commID)
     PRINT_STAR_STRING;
 }
 
+/*打印被封禁的用户信息*/
 void RuntimeFile::showInactiveUsers()const
 {
     PRINT_STAR_STRING;
@@ -1008,58 +1031,15 @@ void RuntimeFile::showOrders(const char* userID, int identity)const
     PRINT_STAR_STRING;
 }
 
-/*!!!!写的什么鬼东西阿！！！！*/
-/*打印卖家ID为sellerID的商品，包括在拍的和下架的*/
+/*打印卖家ID为sellerID的商品，包括在拍的和下架的,printed保证最多只打印一遍属性名*/
 void RuntimeFile::showSellerComms(const char* sellerID)
 {
     PRINT_STAR_STRING;
-    bool noComm = true;
-    CommodityEntry* cur = onAuctionComms;
-    while(cur)
-    {
-        if(equal(sellerID, cur->sellerID))
-            break;
-        cur = cur->next;
-    }
-    if(NULL == cur)
-    {
-        cur = removedComms;
-        while(cur)
-        {
-            if(equal(sellerID, cur->sellerID))
-                break;
-            cur = cur->next;
-        }
-        if(NULL == cur)
-            PROMPT_NO_INFO("商品");
-        else
-        {
-            PRINT_COMM_ATTRS_NAME;
-            while(cur)
-            {
-                if(equal(sellerID, cur->sellerID))
-                    PRINT_COMM_ATTRS_VALUE;
-                cur = cur->next;
-            }
-        }
-    }
-    else
-    {
-       PRINT_COMM_ATTRS_NAME;
-        while(cur)
-       {
-           if(equal(sellerID, cur->sellerID))
-            PRINT_COMM_ATTRS_VALUE;
-            cur = cur->next;
-       } 
-       cur = removedComms;
-       while(cur)
-       {
-           if(equal(sellerID, cur->sellerID))
-            PRINT_COMM_ATTRS_VALUE;
-            cur = cur->next;
-       } 
-    }
+    bool printed = false;
+    printSellerComms(onAuctionComms, sellerID, printed);
+    printSellerComms(removedComms, sellerID, printed);
+    if(!printed)
+        PROMPT_NO_INFO("商品");
     PRINT_STAR_STRING;
 }
 

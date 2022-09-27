@@ -16,6 +16,8 @@
 #define PHONE_NUMBER 2
 #define ADDRESS 3
 #define PASSWD 4
+#define COMM_PRICE 1
+#define COMM_DESCRIPTION 2
 
 /*各属性所占空间大小*/
 #define MAX_ID_SIZE 4
