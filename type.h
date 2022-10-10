@@ -18,6 +18,7 @@
 #define PASSWD 4
 #define COMM_PRICE 1
 #define COMM_DESCRIPTION 2
+#define COMM_AMOUNT 3
 
 /*各属性所占空间大小*/
 #define MAX_ID_SIZE 4
@@ -32,20 +33,20 @@
 
 typedef struct AuctionInfo
 {
-    char bidderID[MAX_ID_SIZE+1];
-    double unitPrice;
-    int amount;
-    char date[MAX_DATE_SIZE+1];
-    AuctionInfo* next;
+    char bidderID[MAX_ID_SIZE+1];   /* 竞拍者ID */
+    double unitPrice;   /* 竞拍单价 */
+    int amount; /* 竞拍数量 */
+    char date[MAX_DATE_SIZE+1]; /* 该条竞拍信息创建时间 */
+    AuctionInfo* next;  /* 用于指向下一条竞拍信息 */
 }AuctionInfo;
 
 typedef struct AuctionList
 {
-    char commID[MAX_ID_SIZE+1];
-    char startDate[MAX_DATE_SIZE+1];
-    int bidderNum;
-    AuctionInfo* head;
-    AuctionList* next;
+    char commID[MAX_ID_SIZE+1]; /* 被竞拍的商品ID */
+    char startDate[MAX_DATE_SIZE+1];    /* 该商品的发布时间，用于检查商品竞拍到期 */
+    int bidderNum;  /* 竞拍者的数量 */
+    AuctionInfo* head;  /* 用于指向本商品的竞拍信息链表 */
+    AuctionList* next;  /* 用于指向竞拍列表的下一个节点 */
 }AuctionList;
 
 typedef struct UserEntry

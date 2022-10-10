@@ -12,7 +12,6 @@ extern char starStr[];
 
 class RuntimeFile
 {
-	friend bool myGreater(const char* str1, const char* str2);
 private:
     UserEntry* usersFile;    
     OrderEntry* ordersFile;
@@ -56,21 +55,21 @@ public:
     ~RuntimeFile();		
 	RuntimeFile operator = (RuntimeFile rFile);
 	RuntimeFile(const RuntimeFile&);
-	void addCommodity( const char* seller , const char* name, 
-	double price, int amount, const char*description);
-	OrderEntry* addOrder(const char* commID, const char* buyerID, const char* sellerID,
-	int amount, double unitPrice);
-	void addUser(const char* name, const char* passwd);
-	bool addAuctionInfo(const char* commID, const char* buyer, double unitPrice, int amount);
-	bool beAuctioned(const char* commID);	
-	void checkCommExpired();
-    LogFlag matching(const char* name, const char* passwd) const;
-	bool find(const char* name ) const;
+	void addCommodity( const char* seller , const char* name, double price, int amount, const char*description);/* 新增一个商品 */
+	OrderEntry* addOrder(const char* commID, const char* buyerID, const char* sellerID,int amount, double unitPrice);	/* 新增一条订单 */
+	void addUser(const char* name, const char* passwd); 	/* 新增一个用户 */
+	bool addAuctionInfo(const char* commID, const char* buyer, double unitPrice, int amount); /* 新增一条竞拍信息 */
+	bool beAuctioned(const char* commID);	/* 判度商品ID为commID的商品是否有用户参与竞拍 */
+	void checkCommExpired();	/* 检查商品拍卖到期情况 */
+    LogFlag matching(const char* name, const char* passwd) const;	/* 判断用户名和密码是否匹配 */
+	bool find(const char* name ) const;		/* 判断用户名为name的用户是否存在 */
+	/*在commList中寻找ID为commID的商品，如果找到把该商品的卖家ID赋给seller,然后返回true*/
 	bool findComm(char* seller, const char* commID, CommodityEntry* commList) ;
-	bool findUser(const char* userID) const;
+	bool findUser(const char* userID) const;	/* 判断是否存在用户ID为userID的用户 */
 	AuctionInfo* findUserInAucList(const char* bidder, const char* commID);
 	void getUserID(const char*userName, char*userID)const;
 	void modifyAuctionInfo(const char* bidder, const char* commID,int option);
+	void modifyCommAmount(const char* commID, int amount);
 	void modifyCommPrice(const char* commID , double newPrice);
 	void modifyCommDesc(const char* commID, const char* newDescription);
 	bool modifyCommState(const char*commID, int newState);

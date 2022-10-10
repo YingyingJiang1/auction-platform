@@ -11,23 +11,23 @@ private:
 public:
 	User(){}
     User(const char* nameInputed);
-	void auction();	
-	void modifyAuction();
-	void modifyCommInfo()const;	
-	void modifyPasswd() const;
-	void modifyUserInfo();
-	void pullCommodity();
-	void putawayComm()const;
-	void releaseCommodity();
-	void searchCommodity()const;
-	void  topUp();
-	void viewUserInfo()const;
-	void viewAllComms( ) const;
-	void viewAllAuctions();
-	void viewCommDetail() const;
-	void viewBuyerOrders() const;
-	void viewSellerOrders() const ;
-	void viewReleasedComm() const;
+	void auction();	/* 竞拍商品 */
+	void modifyAuction(); /* 修改竞拍信息(可取消竞拍) */
+	void modifyCommInfo()const;	 /* 修改发布的商品的信息 */
+	void modifyPasswd() const; /* 修改密码 */ 
+	void modifyUserInfo();	/* 修改用户信息 */
+	void pullCommodity();	/* 下架发布的商品 */
+	void putawayComm()const;	/* 重新发布已下架的商品*/
+	void releaseCommodity();	/* 发布商品 */
+	void searchCommodity()const;	/* 搜索商品 */
+	void  topUp();	/* 充值 */
+	void viewUserInfo()const;	/* 查看用户信息 */
+	void viewAllComms( ) const;	/* 查看所有在拍的商品*/
+	void viewAllAuctions();	/* 查看所有竞拍信息 */
+	void viewCommDetail() const; /* 查看商品详细信息 */
+	void viewBuyerOrders() const;	/* 查看买家订单 */
+	void viewSellerOrders() const ;	/* 查看卖家订单 */
+	void viewReleasedComm() const;	/* 查看本用户发布的商品*/
 };
 #endif
 

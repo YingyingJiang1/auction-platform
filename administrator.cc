@@ -52,12 +52,10 @@ void Administrator::pullCommodity() const
     fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
     {
-        bool found = file.findComm(seller, id, file.onAuctionCommList());
-        if(!found)
-            found = file.findComm(seller, id, file.removedCommList());
+        bool found = file.findComm(seller, id, file.onAuctionCommList());        
         if(!found)
         {
-            PROMPT_MODIFICATION_FAILURE("未找到该ID的商品");
+            PROMPT_MODIFICATION_FAILURE("未找到该在拍ID的商品");
             return;
         }
         if(file.beAuctioned(id))

@@ -8,6 +8,7 @@ printf("%-6s    %-20s   %-10lf   %-20s     %-10d   %-10s     %-10d\n",\
 User::User(const char* nameInputed)
 {
     file.getUserID(nameInputed, userID);
+    assignment(nameInputed, name);
 }
 
 /*用户输入在拍商品ID， 对该在拍商品进行竞拍*/
@@ -35,14 +36,14 @@ void User::auction()
            int amount;
            std::cout << "请输入竞拍单价：";
            std::cin >> unitPrice;
-           if(!checkNum())
+           if(!checkNum() || unitPrice <= 0)
            {
                PROMPT_AUCTION_FAILURE("竞拍单价输入不合法");
                return;
            }
            std::cout << "请输入竞拍数量：";
            std::cin >> amount;
-           if(!checkNum())
+           if(!checkNum() || amount <= 0)
            {
                PROMPT_AUCTION_FAILURE("商品数量不合法");
                return;
@@ -93,15 +94,16 @@ void User::modifyCommInfo() const
     fgets(id, MAX_ID_SIZE+1, stdin);
     if(checkID('M', id))
     {
-        /*没有找到该在拍商品或该商品的卖家不是本用户*/
-        bool found = file.findComm(seller, id, file.onAuctionCommList());        
+        /*没有找到该商品或该商品的卖家不是本用户*/
+        bool found = file.findComm(seller, id, file.onAuctionCommList());     
+        found = file.findComm(seller, id, file.removedCommList());   
         if(!found || !equal(seller, userID))
         {
             PROMPT_MODIFICATION_FAILURE("未在您发布的商品中找到该ID的商品");
             return;
         }
         /*输入属性编号，并对输入进行检查*/
-        std::cout << "请输入要修改的商品的属性(1.价格 2.描述）：";
+        std::cout << "请输入要修改的商品的属性(1.价格 2.描述 3.数量）：";
         std::cin >> seq;
         if(!checkNum())
             PROMPT_OPERATION_NUMBER_ERROR;
@@ -114,7 +116,7 @@ void User::modifyCommInfo() const
                 double price;
                 std::cout << "请输入新的价格：";
                 std::cin >> price;
-                if(checkNum())
+                if(checkNum() && price > 0)
                 {
                     file.modifyCommPrice(id, price);
                     PROMPT_MODIFICATION_SUCCEEED;
@@ -135,6 +137,20 @@ void User::modifyCommInfo() const
                 }
                 else
                     PROMPT_MODIFICATION_FAILURE("商品描述输入不合法");
+            }
+            /*修改商品数量*/
+            else if(seq == COMM_AMOUNT)
+            {
+                int amount;
+                std::cout << "请输入新的数量：" ;
+                std::cin >> amount;
+                if(checkNum() && amount > 0)
+                {
+                    file.modifyCommAmount(id, amount);
+                    PROMPT_MODIFICATION_SUCCEEED;
+                }
+                else
+                    PROMPT_MODIFICATION_FAILURE("商品数量输入不合法" );
             }
             else
                 PROMPT_MODIFICATION_FAILURE("该属性不存在");
@@ -157,7 +173,7 @@ void User::pullCommodity()
         bool found = file.findComm(seller, commID, file.onAuctionCommList());
         if(!found || !equal(seller, userID))
         {
-            PROMPT_PULL_FAILURE("未在您发布的商品中找到该ID的商品");
+            PROMPT_PULL_FAILURE("未在您发布的在拍商品中找到该ID的商品");
             return;
         }
         if(file.beAuctioned(commID))
@@ -244,10 +260,13 @@ void User::modifyUserInfo()
                 fgets(newName, MAX_NAME_SIZE+1, stdin);
                 if(checkAlnum(newName,MAX_NAME_SIZE))
                 {
-                    if(file.find(newName))
+                    if(equal(name, newName))
+                        PROMPT_MODIFICATION_SUCCEEED;
+                    else if(file.find(newName))
                         PROMPT_MODIFICATION_FAILURE("用户名已存在");
                     else
                     {                                          
+                        assignment(newName, name);
                         file.modifyUserAttr(userID, newName, USER_NAME);
                         PROMPT_MODIFICATION_SUCCEEED;
                     }                   
@@ -310,14 +329,14 @@ void User::releaseCommodity()
     }
     std::cout << "请输入商品价格：";
     std::cin >> price;
-    if(!checkNum())
+    if(!checkNum() || price <= 0)
     {
         PROMPT_RELEASE_FAILURE("商品价格输入不合法");
         return;
     }
     std::cout << "请输入商品数量：";
     std::cin >> amount;
-    if(!checkNum())
+    if(!checkNum() || amount <= 0)
     {
         PROMPT_RELEASE_FAILURE("商品数量输入不合法");
         return;

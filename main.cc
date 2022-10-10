@@ -4,7 +4,7 @@
 using namespace std;
 RuntimeFile file;
 void mainIntf();
-int main(int argc, char** argv)
+int main()
 {
     cout << starStr << endl;
     cout << "请阅读以下注意事项：" << endl;
@@ -13,18 +13,9 @@ int main(int argc, char** argv)
     "超出规定长度的部分将会被忽略，所以请控制您输入的字符串的长度" << endl;
     cout << "   3.任何包含 ',' 的输入都会被视为不合法输入" << endl;
     cout << starStr << endl;
-
-    int fd;
-    if(argc == 2)
-    {
-        close(0);
-        fd = open(argv[argc-1], O_RDONLY);  
-    }
    
     int seq;
     mainIntf();
-    if(argc == 2)
-        close(fd);
     return 0;
 }
 

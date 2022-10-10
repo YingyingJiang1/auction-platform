@@ -235,6 +235,7 @@ bool RuntimeFile::beAuctioned(const char* commID)
     {
         if(equal(commID, ptrList->commID))
             return true;
+        ptrList = ptrList->next;
     }
     return false;
 }
@@ -528,7 +529,7 @@ void RuntimeFile::modifyAuctionInfo(const char* bidder, const char* commID, int 
         std::cout << "请输入新的竞拍单价：";
         double unitPrice;
         std::cin >> unitPrice;
-        if(checkNum())
+        if(checkNum() && unitPrice > 0)
         {
             assignCurDate(curInfo->date);
             if(curInfo->unitPrice > unitPrice)
@@ -567,7 +568,7 @@ void RuntimeFile::modifyAuctionInfo(const char* bidder, const char* commID, int 
         std::cout << "请输入新的竞拍数量：" ;
         int amount;
         std::cin >> amount;
-        if(checkNum())
+        if(checkNum() && amount > 0)
         {
             findCommID(commID, onAuctionComms);
             if(previous->amount < amount)
@@ -592,6 +593,7 @@ void RuntimeFile::modifyAuctionInfo(const char* bidder, const char* commID, int 
     /*删除对该商品的竞拍，当该商品所有竞拍信息都被删除时，从auctionList中删除为该商品维护的竞拍节点*/
     else if(3 == option)
     {
+        --ptrList->bidderNum;
         if(curInfo == ptrList->head)
             ptrList->head = curInfo->next;
         else
@@ -612,6 +614,15 @@ void RuntimeFile::modifyAuctionInfo(const char* bidder, const char* commID, int 
         return;
     }
     writeAuctionFile("w");
+}
+
+void RuntimeFile::modifyCommAmount(const char* commID, int amount)
+{
+    findCommID(commID, onAuctionComms);
+    if(!previous)
+        findCommID(commID, removedComms);
+    previous->amount = amount;
+    writeCommsFile("w");
 }
 
 /*修改在拍商品的描述*/
@@ -767,7 +778,7 @@ void RuntimeFile::readToAucList()
             for(int i = 0; i < ptrList->bidderNum; ++i)
             {
                 ptrInfo = new AuctionInfo;
-                ret = fscanf(input, "%[^,]%*c%[^,]%*c%lf%*c%d%*c", ptrInfo->bidderID,
+                ret = fscanf(input, "%[^,]%*c%[^,]%*c%lf%*c%d\n", ptrInfo->bidderID,
                                     ptrInfo->date, &ptrInfo->unitPrice, &ptrInfo->amount);
                 assert(ret == 4);
                 ptrInfo->next = NULL;
@@ -824,7 +835,7 @@ void RuntimeFile::readToOrders()
     {    
         while(1)
         {
-           ret = fscanf(input, "%[^,]%*c%[^,]%*c%lf%*c%d%*c%[^,]%*c%[^,]%*c%[^,]%*c\n",
+           ret = fscanf(input, "%[^,]%*c%[^,]%*c%lf%*c%d%*c%[^,]%*c%[^,]%*c%s\n",
                                 ordersFile[orderSize].id, ordersFile[orderSize].commodityID,&ordersFile[orderSize].unitPrice,
                                 &ordersFile[orderSize].amount, ordersFile[orderSize].date,ordersFile[orderSize].sellerID,
                                 ordersFile[orderSize].buyerID);
@@ -834,6 +845,7 @@ void RuntimeFile::readToOrders()
         }
         fclose(input);
     }
+    std::cout << ordersFile[orderSize-1].date << std::endl;
 }
 
 void RuntimeFile::readToUsers()
@@ -1115,9 +1127,14 @@ void RuntimeFile::showAllOrders() const
 {
 
     cout << starStr << endl;
-    PRINT_ORDER_ATTRS_NAME;
-    for(int i = 0; i < orderSize; ++i)
-        PRINT_ORDER_ATTRS_VALUE;
+    if(orderSize == 0)
+        PROMPT_NO_INFO("订单");
+    else
+    {
+        PRINT_ORDER_ATTRS_NAME;
+        for(int i = 0; i < orderSize; ++i)
+            PRINT_ORDER_ATTRS_VALUE;
+    }
     cout << starStr << endl;
 }
 

@@ -46,20 +46,20 @@ printf("%-10s    %-10s   %-10lf   %-10d   %-20s   %-10s\n", \
                     ordersFile[i].amount, ordersFile[i].date, ordersFile[i].sellerID)
 
 #define PRINT_SELLER_ORDER_ATTRS_NAME \
-printf("%-6s    %-6s   %-10s   %-10s   %-20s   %-10s\n", \
+printf("%-10s    %-10s   %-10s   %-10s   %-20s   %-10s\n", \
             "OrderID", "CommID", "UnitPrice", "Amount", "Date", "BuyerID")
 
 #define PRINT_SELLER_ORDER_ATTRS_VALUE \
-printf("%-6s    %-6s   %-10lf   %-10d   %-20s   %-10s\n", \
+printf("%-10s    %-10s   %-10lf   %-10d   %-20s   %-10s\n", \
                     ordersFile[i].id, ordersFile[i].commodityID, ordersFile[i].unitPrice, \
                     ordersFile[i].amount, ordersFile[i].date, ordersFile[i].buyerID)
 
 #define PRINT_ORDER_ATTRS_NAME \
-printf("%-6s    %-6s   %-10s   %-10s   %-20s   %-10s    %-10s\n", \
+printf("%-10s    %-10s   %-10s   %-10s   %-20s   %-10s    %-10s\n", \
             "OrderID", "CommID", "UnitPrice", "Amount", "Date", "SellerID","BuyerID")
 
 #define PRINT_ORDER_ATTRS_VALUE \
-printf("%-6s    %-6s   %-10lf   %-10d   %-20s   %-10s   %-10s\n", \
+printf("%-10s    %-10s   %-10lf   %-10d   %-20s   %-10s    %-10s\n", \
             ordersFile[i].id, ordersFile[i].commodityID, ordersFile[i].unitPrice, \
             ordersFile[i].amount, ordersFile[i].date, ordersFile[i].sellerID, ordersFile[i].buyerID)
 
