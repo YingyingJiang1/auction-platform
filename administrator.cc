@@ -1,4 +1,11 @@
 #include"administrator.h"
+#include"strOperation.h"
+#include"promptMacro.h"
+#include<iostream>
+using std::cout;
+using std::cin;
+using std::endl;
+
 #define PRINT_COMM_ATTRS_VALUE \
 printf("%-6s    %-20s   %-10lf   %-10s     %-10d   %-10s     %-10d\n",\
             file.commoditiesFile[i].id, file.commoditiesFile[i].name, file.commoditiesFile[i].price, file.commoditiesFile[i].addedDate,\
@@ -55,7 +62,7 @@ void Administrator::pullCommodity() const
         bool found = file.findComm(seller, id, file.onAuctionCommList());        
         if(!found)
         {
-            PROMPT_MODIFICATION_FAILURE("未找到该在拍ID的商品");
+            PROMPT_PULL_FAILURE("未找到该在拍ID的商品");
             return;
         }
         if(file.beAuctioned(id))
@@ -79,7 +86,7 @@ void Administrator::pullCommodity() const
     }
     /*商品ID不是"M+三位数字"的形式*/
     else
-        PROMPT_MODIFICATION_FAILURE("商品ID输入不合法");
+        PROMPT_PULL_FAILURE("商品ID输入不合法");
 }
 
 void Administrator::searchCommodities() const

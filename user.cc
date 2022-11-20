@@ -1,4 +1,10 @@
 #include"user.h"
+#include"promptMacro.h"
+#include"strOperation.h"
+#include<iostream>
+using std::cin;
+using std::cout;
+using std::endl;
 
 #define PRINT_COMM_ATTRS_VALUE \
 printf("%-6s    %-20s   %-10lf   %-20s     %-10d   %-10s     %-10d\n",\
@@ -36,9 +42,9 @@ void User::auction()
            int amount;
            std::cout << "请输入竞拍单价：";
            std::cin >> unitPrice;
-           if(!checkNum() || unitPrice <= 0)
+           if(!checkNum() || !file.checkUnitPrice(commID, unitPrice))
            {
-               PROMPT_AUCTION_FAILURE("竞拍单价输入不合法");
+               PROMPT_AUCTION_FAILURE("竞拍单价输入不合法(可能是因为竞拍价格低于商品底价）");
                return;
            }
            std::cout << "请输入竞拍数量：";
@@ -341,7 +347,7 @@ void User::releaseCommodity()
         PROMPT_RELEASE_FAILURE("商品数量输入不合法");
         return;
     }
-    std::cout << "请输入商品描述：";
+    std::cout << "请输入商品描述（不要包含','号）：";
     fgets(description, MAX_COMM_DESCRIPTION_SIZE+1, stdin);
     if(!checkStr(description,MAX_COMM_DESCRIPTION_SIZE))
     {

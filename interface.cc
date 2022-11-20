@@ -1,30 +1,23 @@
 #include "mainIntfFunc.h"
 #include "menuNumber.h"
-void exitRun()
-{
-    char ch;
-    for(int i = 1; i <= 4; ++i)
-    {
-        ch = getc(stdin);
-        ungetc(ch,stdin);
-        if(ch != '\n')
-            return;
-    }
-    exit(1);
-}
-void prompt();
-void promptAdm();
-void promptUser();
-void promptSeller();
-void promptBuyer();
-void promptPersonalInfo();
+#include<iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+
+inline void prompt();
+inline void promptAdm();
+inline void promptUser();
+inline void promptSeller();
+inline void promptBuyer();
+inline void promptPersonalInfo();
 void enterAdmIntf(Administrator *);
 void enterUserIntf(User *);
 void checkAuctionExpired();
 
 extern  char  starStr[];
 static char str[120] = "===================================================================================="
-"===============================";
+"================";
 void mainIntf()
 {
     int seq;
@@ -309,7 +302,7 @@ void enterUserIntf(User *user)
     }
 }
 
-void prompt()
+inline void prompt()
 {
     cout << str << endl;
     cout << "                  1.管理员登陆    2.用户注册  3.用户登陆  4.退出程序"<< endl;
@@ -317,16 +310,24 @@ void prompt()
     cout <<  "请输入要进行的操作的编号:  ";
 }
 
-void promptAdm()
+inline void promptAdm()
 {
     cout << str << endl;
-    cout << "1.查看所有商品 2.搜索商品 3.下架商品 4.查看所有订单 5.查看所有用户 6.封禁用户 7.查看被封禁用户 8.解封用户 9.注销";
-    cout << endl;
+    
+    cout << "1.查看所有商品" << endl;
+    cout << "2.搜索商品"<<endl;
+    cout << "3.下架商品 "  << endl;
+    cout << "4.查看所有订单" << endl;
+    cout << "5.查看所有用户" << endl;
+    cout << "6.封禁用户 "<< endl;
+    cout << "7.查看被封禁用户" << endl;
+    cout << "8.解封用户" << endl;
+    cout << "9.注销"  << endl;
     cout << str << endl;
     cout << "请输入要进行的操作的编号：";
 }
 
-void promptUser()
+inline void promptUser()
 {
     cout << str << endl;
     cout << "       1.我是买家     2. 我是卖家     3.个人信息管理      4.注销登陆" << endl;
@@ -334,25 +335,36 @@ void promptUser()
     cout << "请输入要进行的操作的编号：" ;
 }
 
-void promptSeller()
+inline void promptSeller()
 {
     cout << str <<endl;
-    cout << "1.发布商品 2.查看发布商品 3.修改商品信息 4.下架商品 5.查看历史订单 6.重新上架商品 7.返回用户主界面";
-    cout << endl;
+    cout << "1.发布商品" << endl;
+    cout << "2.查看发布商品"<< endl;
+    cout << "3.修改商品信息" << endl;
+    cout << "4.下架商品" << endl;
+    cout << "5.查看历史订单" << endl;
+    cout << "6.重新上架商品" << endl;
+    cout << "7.返回用户主界面" << endl;
     cout << str << endl;
     cout << "请输入要进行的操作的编号：";
 }
 
-void promptBuyer()
+inline void promptBuyer()
 {
     cout << str <<endl;
-    cout << "1.查看商品列表 2.竞拍商品 3.搜索商品 4.查看历史订单 5.查看商品详细信息 6.修改竞拍 7.查看竞拍信息 8.返回用户主界面";
-    cout << endl;
+    cout << "1.查看商品列表" << endl;
+    cout << "2.竞拍商品" << endl;
+    cout << "3.搜索商品" << endl;
+    cout << "4.查看历史订单 " << endl;
+    cout << "5.查看商品详细信息"<< endl;
+    cout << "6.修改竞拍"<< endl;
+    cout << "7.查看竞拍信息"<<endl;
+    cout << "8.返回用户主界面" << endl;
     cout << str <<endl;
     cout << "请输入要进行的操作的编号：";
 }
 
-void promptPersonalInfo()
+inline void promptPersonalInfo()
 {
     cout << str << endl;
     cout << "       1.查看信息      2.修改信息      3.充值      4.修改密码      5.返回用户主界面" << endl;

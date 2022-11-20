@@ -1,12 +1,8 @@
 #ifndef RUNTIME_FILE
 #define RUNTIME_FILE
-using namespace std;
 #include"type.h"
-#include"strOperation.h"
-#include"promptMacro.h"
-#include<iostream>
-#define HUGE_NUM 0X7FFFFFFF
 
+#define HUGE_NUM 0X7FFFFFFF
 enum LogFlag{NO_USER= 1, WRONG_PASSWD,LOGIN_SUCCEED, BANNED};
 extern char starStr[];
 
@@ -32,7 +28,7 @@ private:
 	void assignCurDate(char* date);
 	void assignID(char, char*, int);
 	void checkAuctionList();
-	bool checkDateExpired(const char* startDate);
+	bool checkDateExpired(const char* startDate, int auctionDuration);
 	void endAuction(const AuctionList* ptr);
 	void findCommID(const char* commID, CommodityEntry* commList);
 	template<typename T>
@@ -61,6 +57,7 @@ public:
 	bool addAuctionInfo(const char* commID, const char* buyer, double unitPrice, int amount); /* 新增一条竞拍信息 */
 	bool beAuctioned(const char* commID);	/* 判度商品ID为commID的商品是否有用户参与竞拍 */
 	void checkCommExpired();	/* 检查商品拍卖到期情况 */
+	bool checkUnitPrice(const char* commID, double unitPrice);
     LogFlag matching(const char* name, const char* passwd) const;	/* 判断用户名和密码是否匹配 */
 	bool find(const char* name ) const;		/* 判断用户名为name的用户是否存在 */
 	/*在commList中寻找ID为commID的商品，如果找到把该商品的卖家ID赋给seller,然后返回true*/

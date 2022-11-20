@@ -1,5 +1,5 @@
-#ifndef LOG_AND_SIGN_H
-#define LOG_AND_SIGN_H
+#ifndef MAIN_INTF_H
+#define MAIN_INTF_H
 #include "administrator.h"
 #include "user.h"
 extern char starStr[];

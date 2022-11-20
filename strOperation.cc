@@ -1,4 +1,3 @@
-#include<string>
 #include<iostream>
 using namespace std;
 #define ID_SIZE 4

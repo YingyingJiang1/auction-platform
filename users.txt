@@ -1,7 +1,3 @@
-U001,u1,u1,11111111111,nju,3194.000000,1
-U002,u2,222,phoneNumber,modify your address,1001.000000,1
-U003,u3,333,phoneNumber,modify your address,979.000000,1
-U004,u4,444,phoneNumber,modify your address,900.000000,1
-U005,u5,555,phoneNumber,modify your address,245.000000,1
-U006,u6,666,phoneNumber,modify your address,100.000000,1
-U007,u0,000,phoneNumber,modify your address,0.000000,1
+U001,u1,111,phoneNumber,modify your address,150.000000,1
+U002,u2,222,phoneNumber,modify your address,2100.000000,1
+U003,u3,afe,phoneNumber,modify your address,551.000000,1

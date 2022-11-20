@@ -1,6 +1,5 @@
 #include"runtimeFile.h"
-#include<fcntl.h>
-#include<unistd.h>
+#include<iostream>
 using namespace std;
 RuntimeFile file;
 void mainIntf();

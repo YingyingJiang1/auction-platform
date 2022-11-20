@@ -1,6 +1,14 @@
 
 #include"administrator.h"
 #include"user.h"
+#include"strOperation.h"
+#include<stdio.h>
+#include<iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+bool inputName(char* name);
+bool inputPasswd(char* passwd);
 
 void logout(Administrator *adm, User *user)
 {
@@ -9,9 +17,6 @@ void logout(Administrator *adm, User *user)
     if (user)
         delete user;
 }
-bool inputName(char* name);
-bool inputPasswd(char* passwd);
-
 
 Administrator *admLogin()
 {
@@ -29,7 +34,7 @@ Administrator *admLogin()
     if (equal(name, "admin") && equal(passwd, "123456"))
     {
         cout << "登录成功！" << endl << endl;
-        Administrator *adm = new Administrator(name, passwd);
+        Administrator *adm = new Administrator;
         return adm;
     }
     else
@@ -69,7 +74,7 @@ User *userLogin()
         cout << "密码错误，登录失败，返回主菜单！" << endl << endl;
         return NULL;
     case BANNED:
-        cout << "您已被管理员封禁，如需登陆，请先申请解封！" << endl << endl;
+        cout << "您已被管理员封禁，无法登陆！" << endl << endl;
         return NULL;
     }
 }

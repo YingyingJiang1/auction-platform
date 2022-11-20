@@ -1,5 +1,7 @@
-#ifndef FILE_ENTRY_H
-#define FILE_ENTRY_H
+#ifndef TYPE_H
+#define TYPE_H
+/* 商品的拍卖时长，以秒为单位 */
+#define AUCTION_DURATION 24*60*60
 /*商品状态*/
 #define ON_AUCTION 1
 #define REMOVED 0
